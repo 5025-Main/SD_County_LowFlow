@@ -40,12 +40,12 @@ data_processing_date = '06_27_2019' #end date of data
 prev_data_processing_date = '05_31_2019' ## Monthly deliverables ONLY
 #####################
 
-
+maindir = os.getcwd() +'/'
+print 'Main directory is: '+maindir
 ## Input directories
-raindir = maindir+'/0 - Rain Data Download/Data processing '+data_processing_date+'/'
-meterdir = maindir+'0 - Raw Data Download/'
-calibrationdir = maindir+'0 - Raw Data Download/Field Calibration Data/'
-leveldir = maindir+'1a -Level Data biweekly submittals/Data Processing '+data_processing_date+'/'
+raindir = maindir+'0 - Rain Data/'
+calibrationdir = maindir+'0 - Field Data Sheets/'
+leveldir = maindir+'1a -Level Data biweekly submittals/'
 
 ## Previous deliverables
 prev_deliv_dir = maindir+'2 - Flow output Excel files - working drafts/Data Output '+prev_data_processing_date+'/'
