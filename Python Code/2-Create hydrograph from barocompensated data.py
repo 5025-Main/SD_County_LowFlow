@@ -45,7 +45,9 @@ print 'Main directory is: '+maindir
 ## Input directories
 raindir = maindir+'0 - Rain Data/'
 calibrationdir = maindir+'0 - Field Data Sheets/'
-leveldir = maindir+'1a -Level Data biweekly submittals/'
+leveldir = maindir+'1 -Level Data monthly submittals/'
+ancillarydir = maindir + '0 - Ancillary files/'
+
 
 ## Previous deliverables
 prev_deliv_dir = maindir+'2 - Flow output Excel files - working drafts/Data Output '+prev_data_processing_date+'/'
@@ -56,9 +58,9 @@ hydrograph_figureoutput_dir = maindir+'3 - Flow output figures - working hydrogr
 calibration_output_dir =      maindir+'4 - Level calibration files and figures/Data Output '+data_processing_date+'/'
 
 ## Open HvF table
-HvF = pd.read_csv(maindir+'HvF-90degweir.csv',index_col='Level (in)')
-## WEIR DIMENSIONS FOR OVERTOPPING FLOWS
-weir_dims = pd.read_excel(maindir+'2019 Weir Dims.xlsx',sheetname='May 2019',index_col='Site', parse_cols='A:J')
+HvF = pd.read_csv(ancillarydir+'HvF-90degweir.csv',index_col='Level (in)')
+## WEIR DIMENSIONS FOR OVERTOPPING FLOWS 
+weir_dims = pd.read_excel(ancillarydir+'2019 Weir Dims.xlsx',sheetname='May 2019',index_col='Site', parse_cols='A:J')
 
 ## Dictionary of rain gauges for each site
 ## Data from  https://sandiego.onerain.com/rain.php

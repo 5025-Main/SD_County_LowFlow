@@ -141,29 +141,29 @@ for SITE in sorted(SITE_IDs.keys()):
 
 
 raindir = maindir+'0 - Rain Data/'
+raw_rain_files = raindir+'Raw Data/'
+daily_rain_files = raindir+'Daily/'
 
 ## Data from  https://sandiego.onerain.com/rain.php
-raingauge_dict = {'CAR-015':'El_Camino','CAR-059':'El_Camino',  'CAR-069':'San_Marcos', 'CAR-070':'San_Marcos', 'CAR-072':'San_Marcos','CAR-072O':'San_Marcos', 'HST01':'Rainbow', 'SDG-077':'Rancho_Bernardo', 'SDG-072':'Rancho_Bernardo', 'SDG-080':'Rancho_Bernardo', 'SDG-074':'Rancho_Bernardo', 'SDG-084':'Rancho_Bernardo','SDG-085':'Rancho_Bernardo','SDG-085M':'Rancho_Bernardo', 'SDG-080':'Rancho_Bernardo','SDG-115':'Lake_Hodges','SDG-115B':'Lake_Hodges', 'SDR-036':'Flinn_Springs', 'SDR-036J':'Flinn_Springs', 'SDR-041':'Los_Coches', 'SDR-064':'Cactus_County', 'SDR-097':'Los_Coches', 'SDR-098':'Los_Coches', 'SDR-127':'Flinn_Springs','SDR-127B':'Flinn_Springs', 'SDR-207':'Los_Coches','SDR-203A':'Los_Coches','SDR-204A':'Los_Coches','SDR-207G':'Los_Coches','SDR-207L':'Los_Coches','SDR-207M':'Los_Coches','SDR-554':'Los_Coches','SDR-607':'Los_Coches', 'SDR-228':'Cactus_County', 'SDR-754':'Los_Coches', 'SLR-041':'Couser', 'SLR-045':'Deer_Springs', 'SLR-095':'Deer_Springs', 'SLR-150':'Bonsall', 'SLR-152':'Couser', 'SLR-152A':'Couser', 'SLR-152H':'Couser', 'SLR-155':'Couser', 'SLR-155F':'Couser', 'SWT-019':'Bonita', 'SWT-023':'Bonita', 'SWT-030':'Roads', 'SWT-055':'La_Mesa', 'SWT-055A':'La_Mesa','SWT-235':'Roads'}
 
-
-## READ IN precip data    
-
-#for one gauge
+#for one site
 #site_name = 'SLR-152'
+#raingauge_dict = {'CAR-015':'El_Camino','CAR-059':'El_Camino',  'CAR-069':'San_Marcos', 'CAR-070':'San_Marcos', 'CAR-072':'San_Marcos','CAR-072O':'San_Marcos', 'HST01':'Rainbow', 'SDG-077':'Rancho_Bernardo', 'SDG-072':'Rancho_Bernardo', 'SDG-080':'Rancho_Bernardo', 'SDG-074':'Rancho_Bernardo', 'SDG-084':'Rancho_Bernardo','SDG-085':'Rancho_Bernardo','SDG-085M':'Rancho_Bernardo', 'SDG-080':'Rancho_Bernardo','SDG-115':'Lake_Hodges','SDG-115B':'Lake_Hodges', 'SDR-036':'Flinn_Springs', 'SDR-036J':'Flinn_Springs', 'SDR-041':'Los_Coches', 'SDR-064':'Cactus_County', 'SDR-097':'Los_Coches', 'SDR-098':'Los_Coches', 'SDR-127':'Flinn_Springs','SDR-127B':'Flinn_Springs', 'SDR-207':'Los_Coches','SDR-203A':'Los_Coches','SDR-204A':'Los_Coches','SDR-207G':'Los_Coches','SDR-207L':'Los_Coches','SDR-207M':'Los_Coches','SDR-554':'Los_Coches','SDR-607':'Los_Coches', 'SDR-228':'Cactus_County', 'SDR-754':'Los_Coches', 'SLR-041':'Couser', 'SLR-045':'Deer_Springs', 'SLR-095':'Deer_Springs', 'SLR-150':'Bonsall', 'SLR-152':'Couser', 'SLR-152A':'Couser', 'SLR-152H':'Couser', 'SLR-155':'Couser', 'SLR-155F':'Couser', 'SWT-019':'Bonita', 'SWT-023':'Bonita', 'SWT-030':'Roads', 'SWT-055':'La_Mesa', 'SWT-055A':'La_Mesa','SWT-235':'Roads'}
 #rainfiles = [s for s in os.listdir(raindir) if raingauge_dict[site_name] in s]
 
+#for one gauge
 #gauge_name = 'La_Mesa'
 #rainfiles = [s for s in os.listdir(raindir) if gauge_name in s]
 
-# all gauges
-rainfiles = [s for s in os.listdir(raindir) if s.endswith('.xls')]
+#for all gauges
+rainfiles = [s for s in os.listdir(raw_rain_files) if s.endswith('.xls')]
 
 fig, ax = plt.subplots(1,1,figsize=(12,8))
 
 for rainfile in rainfiles:
     print ('')
     print 'Precip file: '+rainfile
-    rain = pd.read_excel(raindir+rainfile)
+    rain = pd.read_excel(raw_rain_files+rainfile)
     rain.index = pd.to_datetime(rain['Reading'])
     ## Resample to regular interval and fill non-data with zeros
     rain = rain.resample('15Min').sum()
@@ -171,8 +171,9 @@ for rainfile in rainfiles:
     rain_1D = rain.resample('1D').sum()
 
     ax.plot_date(rain_1D.index, rain_1D['Value'],ls='steps-pre',marker='None',label=rainfile.split('_')[1:2])
+    ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%m/%d'))
     
-    rain_1D.to_csv(raindir+'Daily/Daily-'+rainfile.replace('.xls','.csv'))
+    rain_1D.to_csv(daily_rain_files+'Daily-'+rainfile.replace('.xls','.csv'))
 
 ax.legend()
 
