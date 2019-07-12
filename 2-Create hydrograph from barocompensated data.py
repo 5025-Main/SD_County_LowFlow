@@ -5,10 +5,13 @@ Created on Fri May 19 12:11:47 2017
 @author: alex.messina
 """
 ### BE SURE TO SET YOUR WORKING DIRECTORY TO:
-## P:\Projects-South\Environmental - Schaedler\5025-18-0010 ESA COSD Continuous Flow\DATA\Python Code ##
+## your github repository ie C:\Users\alex.messina\Documents\GitHub\SD_County_LowFlow\ ##
+
+
 # Import Custom Modules
 from Excel_Plots import Excel_Plots    
 from OvertoppingFlows import *
+from hover_points import *
 import string
 import textwrap
 
@@ -22,36 +25,6 @@ import numpy as np
 import calendar
 #from scipy import signal
 
-def hover_points(line,display_text, fig, ax):
-    annot = ax.annotate("", xy=(0,0), xytext=(-20,20),textcoords="offset points",bbox=dict(boxstyle="round", fc="w"),arrowprops=dict(arrowstyle="->"))
-    annot.set_visible(False)
-    def update_annot(ind):
-        x,y = line[0].get_data()
-        annot.xy = (x[ind["ind"][0]], y[ind["ind"][0]])
-        text = "{}, {}".format(" ".join(list(map(str,ind["ind"]))), " ".join([display_text[n].strftime('%m/%d/%y %H:%M') for n in ind["ind"]]))
-        #print text
-        annot.set_text(text)
-        annot.get_bbox_patch().set_alpha(0.4)
-    def hover(event):
-        vis = annot.get_visible()
-        if event.inaxes == ax:
-            cont, ind = line[0].contains(event)
-            if cont:
-                update_annot(ind)
-                annot.set_visible(True)
-                fig.canvas.draw_idle()
-            else:
-                if vis:
-                    annot.set_visible(False)
-                    fig.canvas.draw_idle()
-            
-    
-    fig.canvas.mpl_connect("motion_notify_event", hover)
-    
-    plt.show()
-    return
-#%%
-
 ## Set Pandas display options
 pd.set_option('display.large_repr', 'truncate')
 pd.set_option('display.width', 180)
@@ -59,27 +32,32 @@ pd.set_option('display.max_rows', 20)
 pd.set_option('display.max_columns', 13)
 plt.ion()
 
+#%%
+
 ### UPDATE HERE #####
 data_processing_date = '06_27_2019' #end date of data
 prev_data_processing_date = '05_31_2019' ## Monthly deliverables ONLY
 #####################
 
+
 ## Input directories
 raindir = maindir+'/0 - Rain Data Download/Data processing '+data_processing_date+'/'
 meterdir = maindir+'0 - Raw Data Download/'
+calibrationdir = maindir+'0 - Raw Data Download/Field Calibration Data/'
+leveldir = maindir+'1a -Level Data biweekly submittals/Data Processing '+data_processing_date+'/'
 
-### UPDATE HERE #####
 ## Previous deliverables
 prev_deliv_dir = maindir+'2 - Flow output Excel files - working drafts/Data Output '+prev_data_processing_date+'/'
-
-## For use on local files
-#leveldir = maindir+'1 - Level Data monthly submittals/Data processing '+data_processing_date+'/'
-leveldir = maindir+'1a -Level Data biweekly submittals/Data Processing '+data_processing_date+'/'
 
 ## Output directories
 hydrograph_fileoutput_dir =   maindir+'2 - Flow output Excel files - working drafts/Data Output '+data_processing_date+'/'
 hydrograph_figureoutput_dir = maindir+'3 - Flow output figures - working hydrographs/Data Output '+data_processing_date+'/'
 calibration_output_dir =      maindir+'4 - Level calibration files and figures/Data Output '+data_processing_date+'/'
+
+## Open HvF table
+HvF = pd.read_csv(maindir+'HvF-90degweir.csv',index_col='Level (in)')
+## WEIR DIMENSIONS FOR OVERTOPPING FLOWS
+weir_dims = pd.read_excel(maindir+'2019 Weir Dims.xlsx',sheetname='May 2019',index_col='Site', parse_cols='A:J')
 
 ## Dictionary of rain gauges for each site
 ## Data from  https://sandiego.onerain.com/rain.php
@@ -94,17 +72,8 @@ site_list = ['CAR-070',	'CAR-072',	'CAR-072B', 'CAR-072O',	'SDG-072',	'SDG-080',
 
 
 ### OFFSET/ FIELD MEASUREMENTS
-calibration_dir = maindir+'0 - Raw Data Download/Field Calibration Data/'
-
-## Open HvF table
-#HvF = pd.read_excel(calibration_dir+'90 degree V-notch Lookup Table.xlsx',skiprows=3,index_col='Level (in)', parse_cols='B:C')
-HvF = pd.read_csv('C:/Users/alex.messina/Desktop/CountyWeirProcessing/HvF-90degweir.csv',index_col='Level (in)')
-
 ## Open spreadsheet
-#fds = pd.read_excel(calibration_dir+'Weir Calibration Field Form 2019 '+data_processing_date+'.xlsx')
-
-#local copy
-fds = pd.read_excel('C:/Users/alex.messina/Desktop/CountyWeirProcessing/Weir Calibration Field Form 2019 '+data_processing_date+'.xlsx')
+fds = pd.read_excel(calibrationdir+'Weir Calibration Field Form 2019 '+data_processing_date+'.xlsx')
 
 ## Make a Datetime column (The TIMESTAMP column is when the form was submitted to Google, not the measurement)
 fds['Datetime'] = pd.to_datetime(fds['Date'].astype('str') +' '+ fds['Time'].astype('str'))
@@ -113,7 +82,6 @@ fds['Datetime'] = fds['Datetime'].apply(lambda x: dt.datetime(x.year, x.month, x
 ## Make Index line up with Excel row numbers for easy reference
 fds.index+=2
 fds['Line#'] = fds.index
-
 
 # Clean up Site Id's
 ## Make a New Series
@@ -126,18 +94,14 @@ for f in fds.iterrows():
     #print fid
     # Make sure the site is in the list
     if fid not in site_list:
-        print(fid + ' NOT IN SITE LIST')
-        
+        print(fid + ' NOT IN SITE LIST')       
 fds.index = fds['SITE ID']
-    
-    
+
 ## UP to 2 level measurements
 ## cm to inches
 fds['Level_above_V_cm'] = fds['Height above (or below) v-notch (cm)']
-#
 fds['Level_above_V_in'] = fds['Level_above_V_cm'] / 2.54
 
-#
 ## UP to 3 flow measurements
 ## Flow in cfs: mL to cfs divided by seconds
 fds['Flow_cfs_1'] = (fds['1. Flow Measurement, Volume in mL']/28316.8) / fds['1. Flow Measurement, Time in Seconds']
@@ -161,8 +125,6 @@ print ('')
 ## TEST print
 #fds[['Site','Datetime','Level_above_V_in_Before','Level_above_V_in_After','Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']]
 
-## WEIR DIMENSIONS FOR OVERTOPPING FLOWS
-weir_dims = pd.read_excel(maindir+'2019 Weir Dims.xlsx',sheetname='May 2019',index_col='Site', parse_cols='A:J')
 
 #%% START HERE - SITE NAME
 
@@ -179,14 +141,13 @@ cal_start = start
 cal_end = dt.datetime(2019,5,31,23,59) 
 #cal_end = dt.datetime(2019,6,6,23,59) 
 
-
-
 ## GET FILE WITH level data
 files = [f for f in os.listdir(leveldir) if f.endswith('.xlsx') == True and SITE_YOU_WANT_TO_PROCESS == f.split(' ')[0]]  
 
 if len(files) == 0:
     print 
     print 'No data file found in folder!'
+    
 for f in files: 
     #MaxFlow = HvF.ix[np.round(MaxLevel,2)]['Q (GPM)']
     print ('')
@@ -213,9 +174,10 @@ for f in files:
 # MANUAL DATA OFFSETS TO GET SERIES TO LINE 
 #    offsets = pd.read_excel('C:/Users/alex.messina/Desktop/CountyWeirProcessing/Offsets and Clip times 05_31_2019_AM.xlsx',sheetname='Offsets',index_col=0,parse_cols='A:G')
 
+    ## Open file of offsets
     offsets = pd.read_excel(hydrograph_fileoutput_dir+'Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Offsets',index_col=0,parse_cols='A:G')
     
-
+    ## Get offsets for each site
     offsets_list_for_site = offsets[offsets.index  == site_name]
     
     ## Add column of zero for data offset
@@ -333,6 +295,7 @@ for f in files:
     ## Look up to v-notch flow table and make Flow data from corrected level data
     try:    
         WL['offset_flow']  = WL['offset_corr_level'].apply(lambda x: HvF.ix[np.round(x,2)]['Q (GPM)'])    
+        
     except KeyError:
         print
         print('KEY ERROR, level value not found!!')
