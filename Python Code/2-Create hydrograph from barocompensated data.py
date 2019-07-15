@@ -131,7 +131,7 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-SITE_YOU_WANT_TO_PROCESS = 'CAR-072B'
+SITE_YOU_WANT_TO_PROCESS = 'SDG-072'
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,6,30,23,59)
@@ -273,7 +273,9 @@ for f in files:
     else:
         tot_offset =  0.0
         print ('Total offset = '+"%.2f"%tot_offset)
-#    tot_offset = -3.18405596318898 ## MANUAL OVERRIDE
+        
+        
+    tot_offset = -6.42950490524934 ## MANUAL OVERRIDE
 
     ###############################################
     ## Apply field calibration offset to PT data    
@@ -408,7 +410,7 @@ for f in files:
     ax4.plot_date(field_meas_flow_QC['Datetime'],field_meas_flow_QC['Flow_gpm_2'],marker='o',c='b',label='Field meas. flow 2')
     ax4.plot_date(field_meas_flow_QC['Datetime'],field_meas_flow_QC['Flow_gpm_3'],marker='o',c='b',label='Field meas. flow 3')
     
-    ## PRevious deliverable data
+    ## Previous deliverable data
     ax4.plot_date(del_df.index,del_df['Flow compound weir (gpm)'], marker='None',ls='-',c='b',label='Previous deliverable')
    
     ### Plot precip on inverted, secondary y axis

@@ -152,8 +152,8 @@ daily_rain_files = raindir+'Daily/'
 #rainfiles = [s for s in os.listdir(raindir) if raingauge_dict[site_name] in s]
 
 #for one gauge
-#gauge_name = 'La_Mesa'
-#rainfiles = [s for s in os.listdir(raindir) if gauge_name in s]
+gauge_name = 'Rancho_Bernardo'
+rainfiles = [s for s in os.listdir(raw_rain_files) if gauge_name in s]
 
 #for all gauges
 rainfiles = [s for s in os.listdir(raw_rain_files) if s.endswith('.xls')]
@@ -170,7 +170,7 @@ for rainfile in rainfiles:
     rain  = rain.fillna(0.)
     rain_1D = rain.resample('1D').sum()
 
-    ax.plot_date(rain_1D.index, rain_1D['Value'],ls='steps-pre',marker='None',label=rainfile.split('_')[1:2])
+    ax.plot_date(rain_1D.index, rain_1D['Value'],ls='steps-pre',marker='None',label=rainfile.split('_')[1:3])
     ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%m/%d'))
     
     rain_1D.to_csv(daily_rain_files+'Daily-'+rainfile.replace('.xls','.csv'))
