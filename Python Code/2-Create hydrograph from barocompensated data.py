@@ -36,16 +36,16 @@ plt.ion()
 #%%
 
 ### UPDATE HERE #####
-data_processing_date = '06_27_2019' #end date of data
+data_processing_date = '06_30_2019' #end date of data
 prev_data_processing_date = '05_31_2019' ## Monthly deliverables ONLY
 #####################
 
-maindir = os.getcwd() +'/'
+maindir = os.getcwd().replace('\\','/') +'/'
 print 'Main directory is: '+maindir
 ## Input directories
 raindir = maindir+'0 - Rain Data/'
 calibrationdir = maindir+'0 - Field Data Sheets/'
-leveldir = maindir+'1 -Level Data monthly submittals/'
+leveldir = maindir+'1 - Level Data monthly submittals/'
 ancillarydir = maindir + '0 - Ancillary files/'
 
 
@@ -76,7 +76,7 @@ site_list = ['CAR-070',	'CAR-072',	'CAR-072B', 'CAR-072O',	'SDG-072',	'SDG-080',
 
 ### OFFSET/ FIELD MEASUREMENTS
 ## Open spreadsheet
-fds = pd.read_excel(calibrationdir+'Weir Calibration Field Form 2019 '+data_processing_date+'.xlsx')
+fds = pd.read_excel(calibrationdir+'Weir Calibration Field Form 2019 CURRENT '+data_processing_date+'.xlsx')
 
 ## Make a Datetime column (The TIMESTAMP column is when the form was submitted to Google, not the measurement)
 fds['Datetime'] = pd.to_datetime(fds['Date'].astype('str') +' '+ fds['Time'].astype('str'))
@@ -96,7 +96,7 @@ for f in fds.iterrows():
     fid = fid.upper()
     #print fid
     # Make sure the site is in the list
-    if fid not in site_list:
+    if fid not in site_list and fid != 'LAB_TEST':
         print(fid + ' NOT IN SITE LIST')       
 fds.index = fds['SITE ID']
 
@@ -115,7 +115,6 @@ fds['Flow_gpm_1'] = fds['Flow_cfs_1'] * 448.83
 fds['Flow_gpm_2'] = fds['Flow_cfs_2'] * 448.83
 fds['Flow_gpm_3'] = fds['Flow_cfs_3'] * 448.83
 
-
 ## Drop any duplicate rows so it doesn't weight the average 
 fds_len =  len(fds)
 fds = fds.drop_duplicates(keep='first')
@@ -132,10 +131,10 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-SITE_YOU_WANT_TO_PROCESS = 'SWT-055'
+SITE_YOU_WANT_TO_PROCESS = 'CAR-070'
 
 ### UPDATE HERE #####
-start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,6,26,23,59)
+start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,6,30,23,59)
 #end = dt.datetime(2019,5,31,23,59)
 
 # when you want to cut off calibration points
@@ -162,7 +161,7 @@ for f in files:
     ## Read in previous deliverable
     prev_deliv_filename = [d for d in os.listdir(prev_deliv_dir) if d.endswith('.xlsx') == True and SITE_YOU_WANT_TO_PROCESS == d.split('-working draft.xlsx')[0]][0]
     
-    print 'Deliverable file: ' + prev_deliv_dir+prev_deliv_filename
+    print 'Previous Deliverable file: ' + prev_deliv_dir + prev_deliv_filename
     print
     del_df = pd.read_excel(prev_deliv_dir+prev_deliv_filename, sheetname=site_name+'-flow',index_col=0,header=0,parse_cols='A:D')
     
@@ -316,10 +315,10 @@ for f in files:
     
 # ADD PRECIP DATA 
     ## READ IN precip data    
-    rainfile = [s for s in os.listdir(raindir) if raingauge_dict[site_name] in s][0]
+    rainfile = [s for s in os.listdir(raindir+'Raw Data/') if raingauge_dict[site_name] in s][0]
     print ('')
     print ('Site: '+site_name+'  Precip file: '+rainfile)
-    rain = pd.read_excel(raindir+rainfile)
+    rain = pd.read_excel(raindir+'Raw Data/'+rainfile)
     rain.index = pd.to_datetime(rain['Reading'])
     ## Resample to regular interval and fill non-data with zeros
     rain = rain.resample('15Min').sum()
@@ -338,11 +337,11 @@ for f in files:
     WL['Flow_compound_clipped'] = WL['Flow_compound_weir']
     
     ## iterate over list of bad data and clip from 'offset_flow_clipped'....
+    print ('Clipping data....')
     for clip in clips_list_for_site.iterrows():
         clip_start, clip_end = clip[1]['Start'], clip[1]['End']
         reason = clip[1]['Reason']
         if pd.isnull(clip_start)==False and pd.isnull(clip_end) == False:
-            print ('Clipping data....')
             print ('Clipped: '+clip_start.strftime('%m/%d/%y %H:%M')+'-'+clip_end.strftime('%m/%d/%y %H:%M')+' Reason: '+reason)
             ## set data in storm_clip_data indices to nan
             WL.loc[clip_start:clip_end, ['offset_flow_clipped']] = np.nan
@@ -391,7 +390,7 @@ for f in files:
 
     ### Plot precip on inverted, secondary y axis
     ax3 = ax2.twinx()
-    ax3.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='b',label='Precip: '+raingauge_dict[site_name])
+    ax3.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
     
     ## Plot all flow data as greyed out bad data
     #ax4.plot_date(WL.index, WL['offset_flow'], marker='None',ls='-',c='red',alpha=0.5,label='Simple V flow')
@@ -414,7 +413,7 @@ for f in files:
    
     ### Plot precip on inverted, secondary y axis
     ax4_2 = ax4.twinx()
-    ax4_2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='b',label='Precip: '+raingauge_dict[site_name])
+    ax4_2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
     
     ## Format/set limits
     ## full scale flow
@@ -617,12 +616,20 @@ for f in files:
 meas_vals = field_meas_level.loc[[site_name]][['Datetime','Level_above_V_in']]
 meas_vals['Offset Level Data (in)'] =  meas_vals['Datetime'].apply(lambda x: WL.ix[x]['offset_level_w_neg'])
 
+meas_vals_QC = field_meas_level_QC.loc[[site_name]][['Datetime','Level_above_V_in']]
+meas_vals_QC = meas_vals_QC[meas_vals_QC['Datetime']<end]
+meas_vals_QC['Offset Level Data (in)'] =  meas_vals_QC['Datetime'].apply(lambda x: WL.ix[x]['offset_level_w_neg'])
+
 ###
 fig, ax = plt.subplots(1,1,figsize=(12,10))
 
 one_to_one = ax.plot([-10,1000],[-10,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
 points = ax.plot(meas_vals['Level_above_V_in'],meas_vals['Offset Level Data (in)'],ls='None',marker='o',markersize=12,label='Level in)')
 
+points = ax.plot(meas_vals_QC['Level_above_V_in'],meas_vals_QC['Offset Level Data (in)'],ls='None',marker='o',markersize=12,label='Level in)', )
+ 
+    
+    
 ax.set_xlabel('Measured Level (in)',fontweight='bold',fontsize=16)
 ax.set_ylabel('Offset Level data (in)',fontweight='bold',fontsize=16)
 
@@ -650,13 +657,17 @@ for col in ['Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']:
     meas_vals = meas_vals.append(field_meas[['Datetime','Level_above_V_in','Predicted_flow',col]].rename(columns={col:'Flow_gpm'}))
     
 meas_vals = meas_vals.dropna()
+meas_vals_QC = meas_vals[meas_vals['Datetime']>dt.datetime(2019,5,31)]
+meas_vals = meas_vals[meas_vals['Datetime']<dt.datetime(2019,5,31)]
 
 
 ###
 fig, ax = plt.subplots(1,1,figsize=(12,10))
 
 one_to_one = ax.plot([0,1000],[0,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
-points = ax.plot(meas_vals['Flow_gpm'],meas_vals['Predicted_flow'],ls='None',marker='o',markersize=12,label='Flow')
+points = ax.plot(meas_vals['Flow_gpm'],meas_vals['Predicted_flow'],ls='None',marker='o',markersize=12,label='Flow',c='b')
+
+ax.plot(meas_vals_QC['Flow_gpm'],meas_vals_QC['Predicted_flow'],ls='None',marker='o',markersize=12,label='Flow',c='r')
 
 ax.set_xlabel('Measured Flow (gpm)',fontweight='bold',fontsize=16)
 ax.set_ylabel('Predicted flow from Measured Level (gpm)',fontweight='bold',fontsize=16)
@@ -687,8 +698,6 @@ final_flow_vals = final_flow_vals[np.isfinite(final_flow_vals['Flow_gpm'])]
 ## Get flow data for the times of the calibration flow measurements
 final_flow_vals['offset_flow'] = final_flow_vals['Datetime'].apply(lambda x: WL.ix[x]['offset_flow'])
 
-
-
 ## QC measurements  
 field_meas_QC = fds.loc[[site_name]][['Datetime','Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']]
 field_meas_QC = field_meas_QC [field_meas_QC['Datetime']>=dt.datetime(2019,5,31)]   
@@ -713,8 +722,8 @@ print 'Average difference between measured, and final processed flow values: '+"
 fig, ax = plt.subplots(1,1,figsize=(12,10))
 
 one_to_one = ax.plot([0,1000],[0,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
-points = ax.plot(final_flow_vals['Flow_gpm'],final_flow_vals['offset_flow'],ls='None',marker='o',markersize=12,label='Flow Cal',c='r')
-QCpoints = ax.plot(final_flow_vals_QC['Flow_gpm'],final_flow_vals_QC['offset_flow'],ls='None',marker='o',markersize=12,label='Flow QC',c='b')
+points = ax.plot(final_flow_vals['Flow_gpm'],final_flow_vals['offset_flow'],ls='None',marker='o',markersize=12,label='Flow Cal',c='b')
+QCpoints = ax.plot(final_flow_vals_QC['Flow_gpm'],final_flow_vals_QC['offset_flow'],ls='None',marker='o',markersize=12,label='Flow QC',c='r')
 
 ax.set_xlabel('Measured Flow (gpm)',fontweight='bold',fontsize=16)
 ax.set_ylabel('Flow data Output (gpm)',fontweight='bold',fontsize=16)
@@ -732,12 +741,11 @@ plt.subplots_adjust(top=0.93)
 
 
 hover_points(points, list(final_flow_vals['Datetime']),fig, ax)
-
-hover_points(QCpoints, list(final_flow_vals['Datetime']),fig, ax)
+hover_points(QCpoints, list(final_flow_vals_QC['Datetime']),fig, ax)
 
 #%% Compare to Ultrasonic
 
-US = pd.read_excel(maindir+'Alta May 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D')
+US = pd.read_excel(ancillarydir+'Alta June 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D')
 
 ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
 

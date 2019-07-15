@@ -7,6 +7,7 @@ Created on Thu Jul 11 18:27:57 2019
 
 
 def hover_points(line,display_text, fig, ax):
+    from matplotlib import pyplot as plt
     annot = ax.annotate("", xy=(0,0), xytext=(-20,20),textcoords="offset points",bbox=dict(boxstyle="round", fc="w"),arrowprops=dict(arrowstyle="->"))
     annot.set_visible(False)
     def update_annot(ind):
