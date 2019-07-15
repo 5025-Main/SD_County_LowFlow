@@ -131,7 +131,7 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-SITE_YOU_WANT_TO_PROCESS = 'CAR-070'
+SITE_YOU_WANT_TO_PROCESS = 'CAR-072B'
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,6,30,23,59)
@@ -442,6 +442,199 @@ for f in files:
     plt.tight_layout()
     plt.subplots_adjust(top=0.95)
 
+
+#%% CHECK FIELD LEVEL vs OFFSET LEVEL
+
+meas_vals = field_meas_level.loc[[site_name]][['Datetime','Level_above_V_in']]
+meas_vals['Offset Level Data (in)'] =  meas_vals['Datetime'].apply(lambda x: WL.ix[x]['offset_level_w_neg'])
+
+meas_vals_QC = field_meas_level_QC.loc[[site_name]][['Datetime','Level_above_V_in']]
+meas_vals_QC = meas_vals_QC[meas_vals_QC['Datetime']<end]
+meas_vals_QC['Offset Level Data (in)'] =  meas_vals_QC['Datetime'].apply(lambda x: WL.ix[x]['offset_level_w_neg'])
+
+###
+fig, ax = plt.subplots(1,1,figsize=(12,10))
+
+one_to_one = ax.plot([-10,1000],[-10,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
+points = ax.plot(meas_vals['Level_above_V_in'],meas_vals['Offset Level Data (in)'],ls='None',marker='o',c='b',markersize=12,label='Cal Level (in)')
+
+QCpoints = ax.plot(meas_vals_QC['Level_above_V_in'],meas_vals_QC['Offset Level Data (in)'],ls='None',marker='o',c='r',markersize=12,label='QC Level (in)', )
+ 
+    
+    
+ax.set_xlabel('Measured Level (in)',fontweight='bold',fontsize=16)
+ax.set_ylabel('Offset Level data (in)',fontweight='bold',fontsize=16)
+
+ax.set_xlim(0, 1.3 *meas_vals['Level_above_V_in'].max())
+ax.set_ylim(0, 1.3 *meas_vals['Level_above_V_in'].max())
+
+ax.legend(loc='upper left')
+
+fig.suptitle('Measured level vs Offset Level',fontweight='bold',fontsize=20)
+ax.set_title(site_name,fontweight='bold',fontsize=18)
+
+plt.tight_layout()
+plt.subplots_adjust(top=0.93)
+
+hover_points(points, list(meas_vals['Datetime']), fig, ax)
+hover_points(QCpoints, list(meas_vals_QC['Datetime']), fig, ax)
+
+#%% CHECK FIELD LEVEL vs FLOW MEASUREMENTS
+
+field_meas = fds.loc[[site_name]][['Datetime','Level_above_V_in','Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']]
+field_meas['Predicted_flow'] = [HvF.ix[np.round(x,2)]['Q (GPM)'] for x in field_meas['Level_above_V_in'].values]
+
+
+meas_vals = pd.DataFrame()
+for col in ['Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']:
+    meas_vals = meas_vals.append(field_meas[['Datetime','Level_above_V_in','Predicted_flow',col]].rename(columns={col:'Flow_gpm'}))
+    
+meas_vals = meas_vals.dropna()
+meas_vals_QC = meas_vals[meas_vals['Datetime']>dt.datetime(2019,5,31)]
+meas_vals = meas_vals[meas_vals['Datetime']<dt.datetime(2019,5,31)]
+
+
+###
+fig, ax = plt.subplots(1,1,figsize=(12,10))
+
+one_to_one = ax.plot([0,1000],[0,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
+points = ax.plot(meas_vals['Flow_gpm'],meas_vals['Predicted_flow'],ls='None',marker='o',markersize=12,label='Flow',c='b')
+
+QCpoints = ax.plot(meas_vals_QC['Flow_gpm'],meas_vals_QC['Predicted_flow'],ls='None',marker='o',markersize=12,label='Flow',c='r')
+
+ax.set_xlabel('Measured Flow (gpm)',fontweight='bold',fontsize=16)
+ax.set_ylabel('Predicted flow from Measured Level (gpm)',fontweight='bold',fontsize=16)
+
+ax.set_xlim(0, 1.3 *meas_vals['Predicted_flow'].max())
+ax.set_ylim(0, 1.3 *meas_vals['Predicted_flow'].max())
+
+ax.legend(loc='upper left')
+
+fig.suptitle('Measured flow vs Flow from measured v-notch height',fontweight='bold',fontsize=20)
+ax.set_title(site_name,fontweight='bold',fontsize=18)
+
+plt.tight_layout()
+plt.subplots_adjust(top=0.93)
+
+hover_points(points, list(meas_vals['Datetime']), fig, ax)
+hover_points(QCpoints, list(meas_vals_QC['Datetime']), fig, ax)
+
+#%% CHECK FLOW MEASUREMENTS vs Final data
+
+## Calibration measurements
+field_meas = field_meas_flow[(field_meas_flow['Datetime']>=dt.datetime(2019,5,1)) & (field_meas_flow['Datetime']<=dt.datetime(2019,5,31))]
+## Concatenate calibration flow values (Flow 1,2,3)
+final_flow_vals = pd.DataFrame()
+for col in ['Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']:
+    final_flow_vals = final_flow_vals.append(field_meas[['Datetime',col]].rename(columns={col:'Flow_gpm'}))
+final_flow_vals = final_flow_vals[np.isfinite(final_flow_vals['Flow_gpm'])]
+## Get flow data for the times of the calibration flow measurements
+final_flow_vals['offset_flow'] = final_flow_vals['Datetime'].apply(lambda x: WL.ix[x]['offset_flow'])
+
+## QC measurements  
+field_meas_QC = fds.loc[[site_name]][['Datetime','Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']]
+field_meas_QC = field_meas_QC[field_meas_QC['Datetime']>=dt.datetime(2019,5,31)]   
+## Concatenate calibration flow values (Flow 1,2,3)
+final_flow_vals_QC = pd.DataFrame()
+for col in ['Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']:
+    final_flow_vals_QC = final_flow_vals_QC.append(field_meas_QC[['Datetime',col]].rename(columns={col:'Flow_gpm'}))
+final_flow_vals_QC = final_flow_vals_QC[np.isfinite(final_flow_vals_QC['Flow_gpm'])]
+
+# Get flow data for the times of the QC flow measurements
+final_flow_vals_QC = final_flow_vals_QC[(final_flow_vals_QC['Datetime']>=dt.datetime(2019,5,31))&(final_flow_vals_QC['Datetime']<=end)]
+final_flow_vals_QC['offset_flow'] = final_flow_vals_QC['Datetime'].apply(lambda x: WL.ix[x]['offset_flow'])
+
+## Calculate flow differences in gpm and %
+final_flow_vals['difference_gpm'] = final_flow_vals['offset_flow'] - final_flow_vals['Flow_gpm']
+final_flow_vals['difference_%'] = (abs(final_flow_vals['offset_flow'] - final_flow_vals['Flow_gpm']) / final_flow_vals['Flow_gpm']) * 100.
+
+print final_flow_vals
+print 
+print 'Average difference between measured, and final processed flow values: '+"%.3f"%final_flow_vals['difference_gpm'].mean() +' gpm'
+print 'Average difference between measured, and final processed flow values: '+"%.1f"%final_flow_vals['difference_%'].mean() +' %'
+
+
+fig, ax = plt.subplots(1,1,figsize=(12,10))
+
+one_to_one = ax.plot([0,1000],[0,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
+points = ax.plot(final_flow_vals['Flow_gpm'],final_flow_vals['offset_flow'],ls='None',marker='o',markersize=12,label='Flow Cal',c='b')
+QCpoints = ax.plot(final_flow_vals_QC['Flow_gpm'],final_flow_vals_QC['offset_flow'],ls='None',marker='o',markersize=12,label='Flow QC',c='r')
+
+ax.set_xlabel('Measured Flow (gpm)',fontweight='bold',fontsize=16)
+ax.set_ylabel('Flow data Output (gpm)',fontweight='bold',fontsize=16)
+
+ax.set_xlim(0, 1.3 *final_flow_vals[['offset_flow','Flow_gpm']].max().max())
+ax.set_ylim(0, 1.3 *final_flow_vals[['offset_flow','Flow_gpm']].max().max())
+ax.legend(loc='upper left')
+
+fig.suptitle('Measured flow vs Flow data output',fontweight='bold',fontsize=20)
+ax.set_title(site_name,fontweight='bold',fontsize=18)
+
+
+plt.tight_layout()
+plt.subplots_adjust(top=0.93)
+
+
+hover_points(points, list(final_flow_vals['Datetime']),fig, ax)
+hover_points(QCpoints, list(final_flow_vals_QC['Datetime']),fig, ax)
+
+#%% Compare to Ultrasonic
+from xlrd import XLRDError
+
+try:
+    US = pd.read_excel(ancillarydir+'Alta June 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D')
+    
+    ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
+    
+    US.index = pd.to_datetime(((US.index.astype(np.int64) // ns5min + 1 ) * ns5min))
+    
+    ## PLOT
+    fig, (ax1, ax2) = plt.subplots(2,1,figsize=(18,10),sharex=True)
+    ## Plot offset level
+    ax1.plot_date(WL.index, WL['offset_corr_level'], marker='None',ls='-',c='green',label='Offset Final Level ('+"%.2f"%tot_offset+' in.)')
+    ## Plot field measurements
+    ax1.plot_date(field_meas_level['Datetime'],field_meas_level['Level_above_V_in'],marker='s',c='r',label='Level Cal')
+    ax1.plot_date(field_meas_level_QC['Datetime'],field_meas_level_QC['Level_above_V_in'],marker='s',c='b',label='Level QC')
+    ## Ultrasonic
+    ax1.plot_date(US.index, US['Level (inches)'],marker='None',ls='-',c='orange',label='UltraSonic')
+    ## Plot compound weir flow data (including correct flow for overtopping flows)
+    ax2.plot_date(WL.index, WL['Flow_compound_weir'], marker='None',ls='-',c='grey',alpha=0.5,label='Weir (storm/bad)')
+    ## Plot corrected data (offset and clipped)
+    ax2.plot_date(WL.index, WL['Flow_compound_clipped'], marker='None',ls='-',c='green',label='Weir Flow')
+    ## Plot field measurements
+    ax2.plot_date(field_meas_flow['Datetime'],field_meas_flow['Flow_gpm_1'],marker='o',c='g',label='Field meas. flow 1')
+    ax2.plot_date(field_meas_flow['Datetime'],field_meas_flow['Flow_gpm_2'],marker='o',c='g',label='Field meas. flow 2')
+    ax2.plot_date(field_meas_flow['Datetime'],field_meas_flow['Flow_gpm_3'],marker='o',c='g',label='Field meas. flow 3')
+    ## QC Measurements
+    ax2.plot_date(field_meas_flow_QC['Datetime'],field_meas_flow_QC['Flow_gpm_1'],marker='o',c='b',label='Field meas. flow 1')
+    ax2.plot_date(field_meas_flow_QC['Datetime'],field_meas_flow_QC['Flow_gpm_2'],marker='o',c='b',label='Field meas. flow 2')
+    ax2.plot_date(field_meas_flow_QC['Datetime'],field_meas_flow_QC['Flow_gpm_3'],marker='o',c='b',label='Field meas. flow 3')
+    ## Ultrasonic
+    ax2.plot_date(US.index, US['Flow (gpm)'],marker='None',ls='-',c='orange',label='UltraSonic')
+    
+    for ax in fig.axes:
+        ax.legend(loc='upper left')
+    ax1.set_ylabel('Level (inches)',color='g')
+    
+    ax2.set_ylabel('Flow (gpm)',color='b')   
+    
+    ### Plot precip on inverted, secondary y axis
+    ax1_2 = ax1.twinx()
+    ax1_2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='b',label='Precip: '+raingauge_dict[site_name])
+    ax1_2.set_ylabel('Precip (inches)',color='teal')
+    ax1_2.invert_yaxis()
+    ax1_2.legend()
+    ax2.xaxis.set_major_formatter(mpl.dates.DateFormatter('%A \n %m/%d/%y %H:%M'))
+    
+    fig.suptitle('Weir vs Ultrasonic for site: '+site_name,fontsize=16,fontweight='bold')
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.95) 
+
+except XLRDError:
+    print
+    print 'No Alta data found for site: ('+site_name+')'
+    print 
+
 #%% SAVE TO EXCEL
 
 ## SAVE EXCEL FILE WITH CALIBRATION DATA
@@ -610,188 +803,3 @@ for f in files:
 #plt.tight_layout()
 #plt.subplots_adjust(top=0.94)
 ##fig.savefig(hydrograph_figureoutput_dir+'Heatmaps/'+site_name+'-heatmap.png')
-
-#%% CHECK FIELD LEVEL vs OFFSET LEVEL
-
-meas_vals = field_meas_level.loc[[site_name]][['Datetime','Level_above_V_in']]
-meas_vals['Offset Level Data (in)'] =  meas_vals['Datetime'].apply(lambda x: WL.ix[x]['offset_level_w_neg'])
-
-meas_vals_QC = field_meas_level_QC.loc[[site_name]][['Datetime','Level_above_V_in']]
-meas_vals_QC = meas_vals_QC[meas_vals_QC['Datetime']<end]
-meas_vals_QC['Offset Level Data (in)'] =  meas_vals_QC['Datetime'].apply(lambda x: WL.ix[x]['offset_level_w_neg'])
-
-###
-fig, ax = plt.subplots(1,1,figsize=(12,10))
-
-one_to_one = ax.plot([-10,1000],[-10,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
-points = ax.plot(meas_vals['Level_above_V_in'],meas_vals['Offset Level Data (in)'],ls='None',marker='o',markersize=12,label='Level in)')
-
-points = ax.plot(meas_vals_QC['Level_above_V_in'],meas_vals_QC['Offset Level Data (in)'],ls='None',marker='o',markersize=12,label='Level in)', )
- 
-    
-    
-ax.set_xlabel('Measured Level (in)',fontweight='bold',fontsize=16)
-ax.set_ylabel('Offset Level data (in)',fontweight='bold',fontsize=16)
-
-ax.set_xlim(0, 1.3 *meas_vals['Level_above_V_in'].max())
-ax.set_ylim(0, 1.3 *meas_vals['Level_above_V_in'].max())
-
-ax.legend(loc='upper left')
-
-fig.suptitle('Measured level vs Offset Level',fontweight='bold',fontsize=20)
-ax.set_title(site_name,fontweight='bold',fontsize=18)
-
-plt.tight_layout()
-plt.subplots_adjust(top=0.93)
-
-hover_points(points, list(meas_vals['Datetime']), fig, ax)
-
-#%% CHECK FIELD LEVEL vs FLOW MEASUREMENTS
-
-field_meas = fds.loc[[site_name]][['Datetime','Level_above_V_in','Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']]
-field_meas['Predicted_flow'] = [HvF.ix[np.round(x,2)]['Q (GPM)'] for x in field_meas['Level_above_V_in'].values]
-
-
-meas_vals = pd.DataFrame()
-for col in ['Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']:
-    meas_vals = meas_vals.append(field_meas[['Datetime','Level_above_V_in','Predicted_flow',col]].rename(columns={col:'Flow_gpm'}))
-    
-meas_vals = meas_vals.dropna()
-meas_vals_QC = meas_vals[meas_vals['Datetime']>dt.datetime(2019,5,31)]
-meas_vals = meas_vals[meas_vals['Datetime']<dt.datetime(2019,5,31)]
-
-
-###
-fig, ax = plt.subplots(1,1,figsize=(12,10))
-
-one_to_one = ax.plot([0,1000],[0,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
-points = ax.plot(meas_vals['Flow_gpm'],meas_vals['Predicted_flow'],ls='None',marker='o',markersize=12,label='Flow',c='b')
-
-ax.plot(meas_vals_QC['Flow_gpm'],meas_vals_QC['Predicted_flow'],ls='None',marker='o',markersize=12,label='Flow',c='r')
-
-ax.set_xlabel('Measured Flow (gpm)',fontweight='bold',fontsize=16)
-ax.set_ylabel('Predicted flow from Measured Level (gpm)',fontweight='bold',fontsize=16)
-
-ax.set_xlim(0, 1.3 *meas_vals['Predicted_flow'].max())
-ax.set_ylim(0, 1.3 *meas_vals['Predicted_flow'].max())
-
-ax.legend(loc='upper left')
-
-fig.suptitle('Measured flow vs Flow from measured v-notch height',fontweight='bold',fontsize=20)
-ax.set_title(site_name,fontweight='bold',fontsize=18)
-
-plt.tight_layout()
-plt.subplots_adjust(top=0.93)
-
-hover_points(points, list(meas_vals['Datetime']), fig, ax)
-
-
-#%% CHECK FLOW MEASUREMENTS vs Final data
-
-## Calibration measurements
-field_meas = field_meas_flow[(field_meas_flow['Datetime']>=dt.datetime(2019,5,1)) & (field_meas_flow['Datetime']<=dt.datetime(2019,5,31))]
-## Concatenate calibration flow values (Flow 1,2,3)
-final_flow_vals = pd.DataFrame()
-for col in ['Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']:
-    final_flow_vals = final_flow_vals.append(field_meas[['Datetime',col]].rename(columns={col:'Flow_gpm'}))
-final_flow_vals = final_flow_vals[np.isfinite(final_flow_vals['Flow_gpm'])]
-## Get flow data for the times of the calibration flow measurements
-final_flow_vals['offset_flow'] = final_flow_vals['Datetime'].apply(lambda x: WL.ix[x]['offset_flow'])
-
-## QC measurements  
-field_meas_QC = fds.loc[[site_name]][['Datetime','Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']]
-field_meas_QC = field_meas_QC [field_meas_QC['Datetime']>=dt.datetime(2019,5,31)]   
-## Concatenate calibration flow values (Flow 1,2,3)
-final_flow_vals_QC = pd.DataFrame()
-for col in ['Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']:
-    final_flow_vals_QC = final_flow_vals_QC.append(field_meas_QC[['Datetime',col]].rename(columns={col:'Flow_gpm'}))
-final_flow_vals_QC = final_flow_vals_QC[np.isfinite(final_flow_vals_QC['Flow_gpm'])]
-# Get flow data for the times of the QC flow measurements
-final_flow_vals_QC['offset_flow'] = final_flow_vals_QC['Datetime'].apply(lambda x: WL.ix[x]['offset_flow'])
-
-## Calculate flow differences in gpm and %
-final_flow_vals['difference_gpm'] = final_flow_vals['offset_flow'] - final_flow_vals['Flow_gpm']
-final_flow_vals['difference_%'] = (abs(final_flow_vals['offset_flow'] - final_flow_vals['Flow_gpm']) / final_flow_vals['Flow_gpm']) * 100.
-
-print final_flow_vals
-print 
-print 'Average difference between measured, and final processed flow values: '+"%.3f"%final_flow_vals['difference_gpm'].mean() +' gpm'
-print 'Average difference between measured, and final processed flow values: '+"%.1f"%final_flow_vals['difference_%'].mean() +' %'
-
-
-fig, ax = plt.subplots(1,1,figsize=(12,10))
-
-one_to_one = ax.plot([0,1000],[0,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
-points = ax.plot(final_flow_vals['Flow_gpm'],final_flow_vals['offset_flow'],ls='None',marker='o',markersize=12,label='Flow Cal',c='b')
-QCpoints = ax.plot(final_flow_vals_QC['Flow_gpm'],final_flow_vals_QC['offset_flow'],ls='None',marker='o',markersize=12,label='Flow QC',c='r')
-
-ax.set_xlabel('Measured Flow (gpm)',fontweight='bold',fontsize=16)
-ax.set_ylabel('Flow data Output (gpm)',fontweight='bold',fontsize=16)
-
-ax.set_xlim(0, 1.3 *final_flow_vals[['offset_flow','Flow_gpm']].max().max())
-ax.set_ylim(0, 1.3 *final_flow_vals[['offset_flow','Flow_gpm']].max().max())
-ax.legend(loc='upper left')
-
-fig.suptitle('Measured flow vs Flow data output',fontweight='bold',fontsize=20)
-ax.set_title(site_name,fontweight='bold',fontsize=18)
-
-
-plt.tight_layout()
-plt.subplots_adjust(top=0.93)
-
-
-hover_points(points, list(final_flow_vals['Datetime']),fig, ax)
-hover_points(QCpoints, list(final_flow_vals_QC['Datetime']),fig, ax)
-
-#%% Compare to Ultrasonic
-
-US = pd.read_excel(ancillarydir+'Alta June 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D')
-
-ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
-
-US.index = pd.to_datetime(((US.index.astype(np.int64) // ns5min + 1 ) * ns5min))
-
-
-
-
-## PLOT
-fig, (ax1, ax2) = plt.subplots(2,1,figsize=(18,10),sharex=True)
-## Plot offset level
-ax1.plot_date(WL.index, WL['offset_corr_level'], marker='None',ls='-',c='green',label='Offset Final Level ('+"%.2f"%tot_offset+' in.)')
-## Plot field measurements
-ax1.plot_date(field_meas_level['Datetime'],field_meas_level['Level_above_V_in'],marker='s',c='r',label='Level Cal')
-ax1.plot_date(field_meas_level_QC['Datetime'],field_meas_level_QC['Level_above_V_in'],marker='s',c='b',label='Level QC')
-## Ultrasonic
-ax1.plot_date(US.index, US['Level (inches)'],marker='None',ls='-',c='orange',label='UltraSonic')
-## Plot compound weir flow data (including correct flow for overtopping flows)
-ax2.plot_date(WL.index, WL['Flow_compound_weir'], marker='None',ls='-',c='grey',alpha=0.5,label='Weir (storm/bad)')
-## Plot corrected data (offset and clipped)
-ax2.plot_date(WL.index, WL['Flow_compound_clipped'], marker='None',ls='-',c='green',label='Weir Flow')
-## Plot field measurements
-ax2.plot_date(field_meas_flow['Datetime'],field_meas_flow['Flow_gpm_1'],marker='o',c='g',label='Field meas. flow 1')
-ax2.plot_date(field_meas_flow['Datetime'],field_meas_flow['Flow_gpm_2'],marker='o',c='g',label='Field meas. flow 2')
-ax2.plot_date(field_meas_flow['Datetime'],field_meas_flow['Flow_gpm_3'],marker='o',c='g',label='Field meas. flow 3')
-## QC Measurements
-ax2.plot_date(field_meas_flow_QC['Datetime'],field_meas_flow_QC['Flow_gpm_1'],marker='o',c='b',label='Field meas. flow 1')
-ax2.plot_date(field_meas_flow_QC['Datetime'],field_meas_flow_QC['Flow_gpm_2'],marker='o',c='b',label='Field meas. flow 2')
-ax2.plot_date(field_meas_flow_QC['Datetime'],field_meas_flow_QC['Flow_gpm_3'],marker='o',c='b',label='Field meas. flow 3')
-## Ultrasonic
-ax2.plot_date(US.index, US['Flow (gpm)'],marker='None',ls='-',c='orange',label='UltraSonic')
-
-for ax in fig.axes:
-    ax.legend(loc='upper left')
-ax1.set_ylabel('Level (inches)',color='g')
-
-ax2.set_ylabel('Flow (gpm)',color='b')   
-
-### Plot precip on inverted, secondary y axis
-ax1_2 = ax1.twinx()
-ax1_2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='b',label='Precip: '+raingauge_dict[site_name])
-ax1_2.set_ylabel('Precip (inches)',color='teal')
-ax1_2.invert_yaxis()
-ax1_2.legend()
-ax2.xaxis.set_major_formatter(mpl.dates.DateFormatter('%A \n %m/%d/%y %H:%M'))
-
-fig.suptitle('Weir vs Ultrasonic for site: '+site_name,fontsize=16,fontweight='bold')
-plt.tight_layout()
-plt.subplots_adjust(top=0.95) 
