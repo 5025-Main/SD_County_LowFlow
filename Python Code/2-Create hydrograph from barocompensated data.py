@@ -131,11 +131,11 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-SITE_YOU_WANT_TO_PROCESS = 'SDG-072'
+SITE_YOU_WANT_TO_PROCESS = 'SDR-751'
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,6,30,23,59)
-#end = dt.datetime(2019,5,31,23,59)
+#end = dt.datetime(2019,7,14,23,59)
 
 # when you want to cut off calibration points
 cal_start = start
@@ -275,7 +275,7 @@ for f in files:
         print ('Total offset = '+"%.2f"%tot_offset)
         
         
-    tot_offset = -6.42950490524934 ## MANUAL OVERRIDE
+#    tot_offset = -2.86089407506562 ## MANUAL OVERRIDE
 
     ###############################################
     ## Apply field calibration offset to PT data    
@@ -353,7 +353,6 @@ for f in files:
             pass
 
 ### PLOT QC hydrograph
-
 
     fig, (ax1, ax2, ax4) = plt.subplots(3,1,figsize=(18,10),sharex=True)
     ## Plot full scale level data
@@ -584,7 +583,10 @@ hover_points(QCpoints, list(final_flow_vals_QC['Datetime']),fig, ax)
 from xlrd import XLRDError
 
 try:
-    US = pd.read_excel(ancillarydir+'Alta June 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D')
+    US = pd.read_excel(ancillarydir+'Alta May 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D')
+    
+    US = US.append(pd.read_excel(ancillarydir+'Alta June 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
+    
     
     ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
     
