@@ -131,7 +131,7 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-SITE_YOU_WANT_TO_PROCESS = 'SDR-751'
+SITE_YOU_WANT_TO_PROCESS = 'CAR-070'
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,6,30,23,59)
@@ -638,6 +638,19 @@ except XLRDError:
     print
     print 'No Alta data found for site: ('+site_name+')'
     print 
+
+#%% TEMP AND CONDUCTIVITY
+
+fig, (ax1, ax2, ax3) = plt.subplots(3,1,sharex=True,figsize=(18,10))
+
+## Temp
+ax1.plot_date(WL.index, WL['°F Water Temperature'],
+
+## Cond
+
+
+## Temp, Cond, Flow
+
 
 #%% SAVE TO EXCEL
 
