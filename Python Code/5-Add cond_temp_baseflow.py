@@ -20,7 +20,7 @@ import seaborn as sns
 ## Set Pandas display options
 pd.set_option('display.large_repr', 'truncate')
 pd.set_option('display.width', 180)
-pd.set_option('display.max_rows', 20)
+pd.set_option('display.max_rows', 30)
 pd.set_option('display.max_columns', 13)
 plt.ion()
 
