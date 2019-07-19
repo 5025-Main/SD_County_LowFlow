@@ -131,11 +131,11 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-SITE_YOU_WANT_TO_PROCESS = 'CAR-070'
+SITE_YOU_WANT_TO_PROCESS = 'SDR-204A'
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,6,30,23,59)
-#end = dt.datetime(2019,7,14,23,59)
+end = dt.datetime(2019,7,18,23,59)
 
 # when you want to cut off calibration points
 cal_start = start
@@ -275,7 +275,7 @@ for f in files:
         print ('Total offset = '+"%.2f"%tot_offset)
         
         
-#    tot_offset = -2.86089407506562 ## MANUAL OVERRIDE
+    tot_offset = -3.09055298818898 ## MANUAL OVERRIDE
 
     ###############################################
     ## Apply field calibration offset to PT data    
@@ -641,16 +641,62 @@ except XLRDError:
 
 #%% TEMP AND CONDUCTIVITY
 
-fig, (ax1, ax2, ax3) = plt.subplots(3,1,sharex=True,figsize=(18,10))
-
-## Temp
-ax1.plot_date(WL.index, WL['°F Water Temperature'],
-
-## Cond
-
-
-## Temp, Cond, Flow
-
+    fig, (ax1, ax2, ax3) = plt.subplots(3,1,sharex=True,figsize=(18,10))
+    
+    ## Temp
+    ax1.plot_date(WL.index, WL[u'°F Water Temperature'],marker='None',ls='-',c='blue',label='Water Temp')
+    ax1.plot_date(WL.index, WL[u'°F Logger Temperature'],marker='None',ls='-',c='tomato',label='Air Temp')
+    
+    ## Cond
+    cond_cals = fds[fds['SITE ID'] == site_name][['Datetime','Specific Conductivity (uS/cm)']].dropna()
+    WL[u'uS/cm EC'] = WL[u'mS/cm EC'] * 1000.
+    ax2.plot_date(WL.index, WL[u'uS/cm EC'],marker='None',ls='-',c='tomato',label='Cond (uS/cm)')
+    ax2.plot_date(cond_cals['Datetime'],cond_cals['Specific Conductivity (uS/cm)'],marker='o',ls='None',color='r',label='Manual measurements')
+    
+    ### Plot precip on inverted, secondary y axis
+    ax2_2 = ax2.twinx()
+    ax2_2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
+    
+    ## Temp, Cond, Flow, precip
+    
+    ## Plot compound weir flow data (including correct flow for overtopping flows)
+    ax3.plot_date(WL.index, WL['Flow_compound_weir'], marker='None',ls='-',c='grey',alpha=0.5,label='Clipped flow data (storm/bad)')
+    ## Plot corrected data (offset and clipped)
+    ax3.plot_date(WL.index, WL['Flow_compound_clipped'], marker='None',ls='-',c='green',label='Corrected Flow, Compound, Clipped')
+    
+    ## Cond
+    ax3_2 = ax3.twinx()
+    ax3_2.plot_date(WL.index, WL[u'uS/cm EC'],marker='None',ls='-',c='tomato',alpha=0.5,label='Cond (uS/cm)')
+    
+    
+    ### Plot precip on inverted, secondary y axis
+    ax3_3 = ax3.twinx()
+    ax3_3.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
+    
+    ## scale
+    ax3.set_ylim(-WL['offset_flow'].max() * 0.1, WL['offset_flow'].max() * 1.1)
+    ax3_2.set_ylim(-WL[u'uS/cm EC'].max() * 0.75, WL[u'uS/cm EC'].max() * 1.1)
+    ax2_2.set_ylim(0, rain['Value'].max() * 3.),ax3_3.set_ylim(0, rain['Value'].max() * 3.)
+    ax2_2.invert_yaxis(), ax3_3.invert_yaxis()
+    
+    
+    ax1.set_xlim(start, end)
+    ax1.set_ylabel(u'Temperature °F ',color='k')
+    ax2.set_ylabel('Sp Conductivity (uS/cm)',color='k'), ax3_2.set_ylabel('Sp Conductivity (uS/cm)',color='k')
+    ax3.set_ylabel('Flow (gpm)',color='k')
+    ax3_3.set_ylabel('Precip (in)')
+    ax3_3.spines["right"].set_position(("axes", 1.1))
+    
+    ax1.legend(fontsize=12,numpoints=1,ncol=1,loc='upper left')
+    ax2.legend(fontsize=12,loc='lower left')
+    ax3.legend(fontsize=12,numpoints=1,ncol=1,loc='lower right')
+    
+    ax3.xaxis.set_major_formatter(mpl.dates.DateFormatter('%A \n %m/%d/%y %H:%M'))
+    
+    fig.suptitle('Data processing for site: '+site_name,fontsize=16,fontweight='bold')
+    plt.tight_layout()
+    plt.subplots_adjust(top=0.95)
+    
 
 #%% SAVE TO EXCEL
 
