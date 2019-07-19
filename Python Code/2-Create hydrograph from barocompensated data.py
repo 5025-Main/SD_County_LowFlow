@@ -790,18 +790,18 @@ except XLRDError:
     m = pd.notnull(flowoutput['Flow_compound_weir'])
     flowoutput = flowoutput.where(m, np.nan)   
     
-    WL.loc[:,'Baseflow (gpm)'] = flowoutput['Baseflow (gpm)']
-    WL.loc[:,'Peakflow (gpm)'] = flowoutput['Peakflow (gpm)']
+    WL.loc[:,'Baseflow (gpm)'] = flowoutput['Baseflow (gpm)'].round(3)
+    WL.loc[:,'Peakflow (gpm)'] = flowoutput['Peakflow (gpm)'].round(3)
 
 
-#%%
+#%% BASEFLOW PLOT
     ## PLOT
     fig, (ax1,ax2,ax3) = plt.subplots(3,1,figsize=(20,10),sharex=True)
     fig.suptitle(site_name,fontsize=14, fontweight='bold')
     
     ## Flow
     ax1.plot_date(WL.index, WL['Flow_compound_weir'],marker='None',ls='-',label='Orig. Flow Data (gpm)',c='grey')
-    ax1.plot_date(WL.index, WL['Flow compound weir (gpm) smooth'],marker='None',ls='-',label='Smoothed Flow Data (gpm)',c='b')
+    ax1.plot_date(flowoutput.index, flowoutput['Flow compound weir (gpm) smooth'],marker='None',ls='-',label='Smoothed Flow Data (gpm)',c='b')
     ax1.plot_date(WL.index, WL['Baseflow (gpm)'],marker='None',ls='-',label='Baseflow (digital filter='+str(alpha)+')',c='g')
     ax1.set_ylabel('Flow (gpm)',fontweight='bold',fontsize=14)
     ## Spec Conductivity and Water Temp
@@ -849,13 +849,15 @@ except XLRDError:
     Corr_flow = WL[['offset_flow','Flow_compound_weir','Flow_compound_clipped']].round(2)
     Corr_flow.columns = ['Flow (gpm)', 'Flow compound weir (gpm)', 'Flow compound weir stormflow clipped (gpm)']
     
+    ## Add base/peakflow
+    Corr_flow[['Baseflow (gpm)','Peakflow (gpm)']] = WL[['Baseflow (gpm)','Peakflow (gpm)']]
+    
     ## Add temp and conductivity to deliverable
     Corr_flow[u'uS/cm EC'] = WL[u'uS/cm EC'].round(0)
     Corr_flow[u'°F Water Temperature'] = WL[u'°F Water Temperature'].round(1)
     
-    ## Add base/peakflow
-    Corr_flow[['Baseflow (gpm)','Peakflow (gpm)']] = WL[['Baseflow (gpm)','Peakflow (gpm)']]
-
+    
+    ## PIVOT TABLE STUFF
     Corr_flow.loc[:,('Year')] = Corr_flow.index.year
     Corr_flow.loc[:,('Month')] = Corr_flow.index.month
     Corr_flow.loc[:,('Day')] = Corr_flow.index.day
