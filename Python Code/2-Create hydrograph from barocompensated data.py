@@ -135,7 +135,7 @@ SITE_YOU_WANT_TO_PROCESS = 'CAR-072'
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,6,30,23,59)
-end = dt.datetime(2019,7,18,23,59)
+end = dt.datetime(2019,7,22,23,59)
 
 # when you want to cut off calibration points
 cal_start = start
