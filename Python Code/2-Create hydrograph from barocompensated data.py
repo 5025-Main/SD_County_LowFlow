@@ -6,8 +6,8 @@ Created on Fri May 19 12:11:47 2017
 """
 ### BE SURE TO SET YOUR WORKING DIRECTORY TO:
 ## your github repository ie C:\Users\alex.messina\Documents\GitHub\SD_County_LowFlow\ ##
+## to load modules set working directory to C:\Users\alex.messina\Documents\GitHub\SD_County_LowFlow\Python code\
 
-## This is alex's branch
 
 # Import Custom Modules
 from Excel_Plots import Excel_Plots    
@@ -131,7 +131,7 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-SITE_YOU_WANT_TO_PROCESS = 'SDR-204A'
+SITE_YOU_WANT_TO_PROCESS = 'CAR-072'
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,6,30,23,59)
@@ -509,9 +509,9 @@ meas_vals = meas_vals[meas_vals['Datetime']<dt.datetime(2019,5,31)]
 fig, ax = plt.subplots(1,1,figsize=(12,10))
 
 one_to_one = ax.plot([0,1000],[0,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
-points = ax.plot(meas_vals['Flow_gpm'],meas_vals['Predicted_flow'],ls='None',marker='o',markersize=12,label='Flow',c='b')
+points = ax.plot(meas_vals['Flow_gpm'],meas_vals['Predicted_flow'],ls='None',marker='o',markersize=12,label='Cal Flow',c='b')
 
-QCpoints = ax.plot(meas_vals_QC['Flow_gpm'],meas_vals_QC['Predicted_flow'],ls='None',marker='o',markersize=12,label='Flow',c='r')
+QCpoints = ax.plot(meas_vals_QC['Flow_gpm'],meas_vals_QC['Predicted_flow'],ls='None',marker='o',markersize=12,label='QC Flow',c='r')
 
 ax.set_xlabel('Measured Flow (gpm)',fontweight='bold',fontsize=16)
 ax.set_ylabel('Predicted flow from Measured Level (gpm)',fontweight='bold',fontsize=16)
@@ -796,7 +796,8 @@ except XLRDError:
 
 #%% BASEFLOW PLOT
     ## PLOT
-    fig, (ax1,ax2,ax3) = plt.subplots(3,1,figsize=(20,10),sharex=True)
+#    fig, (ax1,ax2,ax3) = plt.subplots(3,1,figsize=(20,10),sharex=True)
+    fig, ax1 = plt.subplots(1,1)
     fig.suptitle(site_name,fontsize=14, fontweight='bold')
     
     ## Flow
@@ -804,26 +805,28 @@ except XLRDError:
     ax1.plot_date(flowoutput.index, flowoutput['Flow compound weir (gpm) smooth'],marker='None',ls='-',label='Smoothed Flow Data (gpm)',c='b')
     ax1.plot_date(WL.index, WL['Baseflow (gpm)'],marker='None',ls='-',label='Baseflow (digital filter='+str(alpha)+')',c='g')
     ax1.set_ylabel('Flow (gpm)',fontweight='bold',fontsize=14)
-    ## Spec Conductivity and Water Temp
-    ax2.plot_date(WL.index, WL[u'mS/cm EC'],marker='None',ls='-',label='Sp Conductivity',c='orange')
-    ax2.set_ylabel('Spec. Conductivity (mS/cm)',fontweight='bold',fontsize=14)
-    ## Air temp and pressure
-    ax3.plot_date(WL.index, WL[u'kPa Reference Pressure'],marker='None',ls='-',label='Barometric Press.',c='teal')
-    ax3.set_ylabel('Pressure (kPa)',fontweight='bold',fontsize=14)
-
+    
+    
+#    ## Spec Conductivity and Water Temp
+#    ax2.plot_date(WL.index, WL[u'mS/cm EC'],marker='None',ls='-',label='Sp Conductivity',c='orange')
+#    ax2.set_ylabel('Spec. Conductivity (mS/cm)',fontweight='bold',fontsize=14)
+#    ## Air temp and pressure
+#    ax3.plot_date(WL.index, WL[u'kPa Reference Pressure'],marker='None',ls='-',label='Barometric Press.',c='teal')
+#    ax3.set_ylabel('Pressure (kPa)',fontweight='bold',fontsize=14)
+#
     for ax in fig.axes:
         ax.legend(loc='upper left')
-    
-    ax2_2 = ax2.twinx()
-    ax2_2.plot_date(WL.index, WL[u'°F Water Temperature'],marker='None',ls='-',label='Water Temp(F)',c='b')
-    ax2_2.set_ylabel('Temp(F)',fontweight='bold',fontsize=14)
-    
-    ax3_2 = ax3.twinx()
-    ax3_2.plot_date(WL.index, WL[u'°F Logger Temperature'],marker='None',ls='-',label='Air Temp(F)',c='tomato')
-    ax3_2.set_ylabel('Temp(F)',fontweight='bold',fontsize=14)
-    
-    for ax in [ax2_2, ax3_2]:
-        ax.legend(loc='upper right')
+#    
+#    ax2_2 = ax2.twinx()
+#    ax2_2.plot_date(WL.index, WL[u'°F Water Temperature'],marker='None',ls='-',label='Water Temp(F)',c='b')
+#    ax2_2.set_ylabel('Temp(F)',fontweight='bold',fontsize=14)
+#    
+#    ax3_2 = ax3.twinx()
+#    ax3_2.plot_date(WL.index, WL[u'°F Logger Temperature'],marker='None',ls='-',label='Air Temp(F)',c='tomato')
+#    ax3_2.set_ylabel('Temp(F)',fontweight='bold',fontsize=14)
+#    
+#    for ax in [ax2_2, ax3_2]:
+#        ax.legend(loc='upper right')
     
     #ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%m-%d-%Y %H:%M'))
     ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%m-%d %H:%M'))
