@@ -8,6 +8,7 @@ Created on Fri May 19 12:11:47 2017
 ## your github repository ie C:\Users\alex.messina\Documents\GitHub\SD_County_LowFlow\ ##
 ## to load modules set working directory to C:\Users\alex.messina\Documents\GitHub\SD_County_LowFlow\Python code\
 
+os.chdir('F:/github/work/SD_County_LowFlow/Python Code/')
 
 # Import Custom Modules
 from Excel_Plots import Excel_Plots    
@@ -33,11 +34,12 @@ pd.set_option('display.max_rows', 20)
 pd.set_option('display.max_columns', 13)
 plt.ion()
 
+os.chdir('F:/github/work/SD_County_LowFlow/')
 #%%
 
 ### UPDATE HERE #####
-data_processing_date = '06_30_2019' #end date of data
-prev_data_processing_date = '05_31_2019' ## Monthly deliverables ONLY
+data_processing_date = '07_25_2019' #end date of data
+prev_data_processing_date = '06_30_2019' ## Monthly deliverables ONLY
 #####################
 
 maindir = os.getcwd().replace('\\','/') +'/'
@@ -131,10 +133,10 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-SITE_YOU_WANT_TO_PROCESS = 'CAR-072'
+SITE_YOU_WANT_TO_PROCESS = 'SDG-085'
 
 ### UPDATE HERE #####
-start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,6,30,23,59)
+start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,22,23,59)
 end = dt.datetime(2019,7,22,23,59)
 
 # when you want to cut off calibration points
