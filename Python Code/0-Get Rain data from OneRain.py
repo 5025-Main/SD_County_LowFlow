@@ -40,7 +40,7 @@ SITE_SERIAL_dict = {'Bonita':'dbbd1242-4f9f-43f9-90b9-8b3ad8eeb0c4','Bonsall':	'
 start_date, end_date = '2019-04-31', dt.date.today().strftime('%Y-%m-%d')
 ## DOWNLOAD Bonsall manually, for some reason it gets wrong data
 
-daterange = pd.date_range('20190430',dt.datetime.now(),freq='D')
+daterange = pd.date_range('20190630',dt.datetime.now(),freq='D')
 
 
 for SITE in sorted(SITE_IDs.keys()):
