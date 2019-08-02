@@ -36,8 +36,8 @@ plt.ion()
 #%%
 
 ### UPDATE HERE #####
-data_processing_date = '06_30_2019' #end date of data
-prev_data_processing_date = '05_31_2019' ## Monthly deliverables ONLY
+data_processing_date = '07_31_2019' #end date of data
+prev_data_processing_date = '06_31_2019' ## Monthly deliverables ONLY
 #####################
 
 maindir = os.getcwd().replace('\\','/') +'/'
@@ -134,8 +134,8 @@ print ('')
 SITE_YOU_WANT_TO_PROCESS = 'CAR-072'
 
 ### UPDATE HERE #####
-start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,6,30,23,59)
-end = dt.datetime(2019,7,22,23,59)
+start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,31,23,59)
+#end = dt.datetime(2019,7,22,23,59)
 
 # when you want to cut off calibration points
 cal_start = start
