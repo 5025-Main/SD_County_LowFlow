@@ -23,10 +23,10 @@ import pandas as pd
 import requests
 
 import datetime as dt
+import os
 
-
-#maindir = 'P:/Projects-South/Environmental - Schaedler/5025-19-W006 CoSDWQ TO6 Low Flow Monitoring/DATA/Data Processing/'
-
+maindir = 'F:/github/work/SD_County_LowFlow/'
+os.chdir('F:/github/work/SD_County_LowFlow/Python Code/')
 
 SITE_IDs = {'Bonita':11,'Bonsall':	118,'Cactus County Park':	74,'Couser Canyon':	117,'Deer Springs':	104,'El Camino del Norte':	32,'Flinn Springs County Park':	61,'La Mesa':	16,'Lake Hodges':	29,'Los Coches':	62,'Rainbow County Park':	121,'Rancho Bernardo':	28,'Roads Div I':	15,'San Marcos CRS':	105}
 
@@ -37,10 +37,10 @@ SITE_IDs = {'Bonita':11,'Bonsall':	118,'Cactus County Park':	74,'Couser Canyon':
 SITE_SERIAL_dict = {'Bonita':'dbbd1242-4f9f-43f9-90b9-8b3ad8eeb0c4','Bonsall':	'e6f79336-c471-44b4-ae9f-440dc5021b92','Cactus County Park':	'1e235bf7-3b36-46a5-9202-d5969a3d7f98', 'Couser Canyon':	'cbe65d01-2763-4743-995c-b8d0753eeae7','Deer Springs':	'2a03361b-b8e7-430b-ad6f-aa897a765439','El Camino del Norte':	'730fd8d6-b24f-485a-b869-642a59b9dd72','Flinn Springs County Park':	'b73e2e89-144a-46f3-83ef-3e3ca268a8d6','Granite Hills':'ac0f8008-2fae-4df7-a376-22ebf92e1ff0','La Mesa':	'e9d397f8-de38-429f-a324-9d339a38547a','Lake Hodges':'65212cff-f993-44a7-befb-fbd331cd5d1c','Los Coches':	'e186e452-ddd5-4119-a34c-efdc00b35221','Rainbow County Park':	'081af52d-e96d-495b-adb3-fe4df7151e72','Rancho Bernardo':	'a1c6e51f-7f47-4b67-82c0-71f319062885','Roads Div I':	'91047666-b9ea-48a7-bb25-f3d0b974a428','San Marcos CRS':	'5476904e-d351-44ec-80e5-80ea107b65e8','Valley Center':'bfbccfe2-79fd-42c8-9b8f-7b19eeaa06bd'}
 
 ######### UPDATE HERE ###################
-start_date, end_date = '2019-04-31', dt.date.today().strftime('%Y-%m-%d')
-## DOWNLOAD Bonsall manually, for some reason it gets wrong data
+start_date, end_date = '2019-07-24', dt.date.today().strftime('%Y-%m-%d')
+## DOWNLOAD Bonsall and Granite Hills manually, for some reason it gets wrong data
 
-daterange = pd.date_range('20190430',dt.datetime.now(),freq='D')
+daterange = pd.date_range('20190630',dt.datetime.now(),freq='D')
 
 
 for SITE in sorted(SITE_IDs.keys()):
@@ -136,7 +136,33 @@ for SITE in sorted(SITE_IDs.keys()):
         
         
         
-        
+#%%combine mutiple files
+
+
+#Script expects the old files to be in a folder in the Raw data directory within the "0 - Rain Data". 
+#Place newly downloaded rain data in a second folder in the same Raw data directory.
+#The script will combine the files with the same names from each folder and output them to the raw data directory.
+
+raindir = maindir+'0 - Rain Data/'
+Site_list = ['Bonita', 'Bonsall', 'Cactus_County_Park',  'Couser_Canyon', 'Deer_Springs', 'El_Camino_del_Norte', 'Flinn_Springs_County_Park', 'Granite_Hills', 'La_Mesa', 'Lake_Hodges', 'Los_Coches', 'Rainbow_County_Park', 'Rancho_Bernardo', 'Roads_Div_I', 'San_Marcos_CRS']
+raw_rain_files = raindir+'Raw Data/'
+rain_folder_list = os.listdir(raw_rain_files)
+rain_panda = pd.DataFrame()
+for SITE in Site_list:
+    filename = [s for s in os.listdir(raw_rain_files + rain_folder_list[0] + '/') if SITE in s][0]
+    print(filename)
+    panda_list = []
+    for folder in rain_folder_list:
+        file_panda = pd.read_excel(raw_rain_files + folder + '/' + filename, index_col = 'Reading')
+        panda_list.append(file_panda)
+    rain_panda = pd.concat(panda_list, ignore_index=False, sort=True)
+    rain_panda = rain_panda.sort_index()
+    rain_panda.drop_duplicates(inplace=True)
+    print(rain_panda)
+    writer = pd.ExcelWriter(raw_rain_files+filename, engine='xlsxwriter')
+    rain_panda.to_excel(writer,sheet_name='Data')
+    writer.save()
+
 #%% Plot rain data
 
 
