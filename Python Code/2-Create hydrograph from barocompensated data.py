@@ -135,7 +135,7 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-SITE_YOU_WANT_TO_PROCESS = 'SDR-740'
+SITE_YOU_WANT_TO_PROCESS = 'SDR-568'
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,31,23,59)
