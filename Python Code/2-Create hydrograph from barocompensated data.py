@@ -8,6 +8,8 @@ Created on Fri May 19 12:11:47 2017
 ## your github repository ie C:\Users\alex.messina\Documents\GitHub\SD_County_LowFlow\ ##
 ## to load modules set working directory to C:\Users\alex.messina\Documents\GitHub\SD_County_LowFlow\Python code\
 
+import os
+os.chdir('F:/github/work/SD_County_LowFlow/Python Code/')
 
 # Import Custom Modules
 from Excel_Plots import Excel_Plots    
@@ -21,10 +23,12 @@ import datetime as dt
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 import pandas as pd
-import os
+
 import numpy as np
 import calendar
 from scipy import signal
+
+os.chdir('F:/github/work/SD_County_LowFlow/')
 
 ## Set Pandas display options
 pd.set_option('display.large_repr', 'truncate')
@@ -45,7 +49,7 @@ print 'Main directory is: '+maindir
 ## Input directories
 raindir = maindir+'0 - Rain Data/'
 calibrationdir = maindir+'0 - Field Data Sheets/'
-leveldir = maindir+'1 - Level Data monthly submittals/'
+leveldir = maindir+'1 - Level Data monthly submittals/July Monthly Deliverable/'
 ancillarydir = maindir + '0 - Ancillary files/'
 
 
@@ -131,7 +135,7 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-SITE_YOU_WANT_TO_PROCESS = 'SDR-098'
+SITE_YOU_WANT_TO_PROCESS = 'SDR-740'
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,31,23,59)
