@@ -14,15 +14,21 @@ from PIL import Image
 import datetime as dt
 
 ### CHOO CHOO CHOOse your site
-site = 'SDR-127'
+site = 'CAR-070'
 
+## Using github directory
+#flow_dir = hydrograph_fileoutput_dir
+#level_dir = calibration_output_dir 
+## Hardcoding directories
 flow_dir = 'C:/Users/alex.messina/Documents/GitHub/SD_County_LowFlow/2 - Flow output Excel files - working drafts/Data Output 07_25_2019/'
+level_dir = 'C:/Users/alex.messina/Documents/GitHub/SD_County_LowFlow/4 - Level calibration files and figures/Data Output 07_25_2019/'
+##
 flow_filename = [f for f in os.listdir(flow_dir) if f.split('-working draft.xlsx')[0]==site][0]
 flow_df = pd.read_excel(flow_dir+flow_filename,sheetname=site+'-flow')
-level_dir = 'C:/Users/alex.messina/Documents/GitHub/SD_County_LowFlow/4 - Level calibration files and figures/Data Output 07_25_2019/'
 level_filename= [f for f in os.listdir(level_dir) if f.split('-calibration.xlsx')[0]==site][0]
 level_df = pd.read_excel(level_dir+level_filename,sheetname='Level and Flow data')
 
+## Downloading photos from Google Photos
 pic_dir = 'C:/Users/alex.messina/Downloads/'
 pic_folder = site + '/'
 
@@ -30,7 +36,7 @@ pic_folder = site + '/'
 #%%
 
 # define your images to be plotted
-pics = [os.listdir(pic_dir+pic_folder)][0][975:] ## You can limit photos here
+pics = [os.listdir(pic_dir+pic_folder)][0][900:] ## You can limit photos here
 
 # now the real code :) 
 curr_pos = 0
