@@ -17,8 +17,8 @@ import datetime as dt
 site = 'CAR-070'
 
 ## Using github directory
-#flow_dir = hydrograph_fileoutput_dir
-#level_dir = calibration_output_dir 
+flow_dir = hydrograph_fileoutput_dir
+level_dir = calibration_output_dir 
 ## Hardcoding directories
 flow_dir = 'C:/Users/alex.messina/Documents/GitHub/SD_County_LowFlow/2 - Flow output Excel files - working drafts/Data Output 07_25_2019/'
 level_dir = 'C:/Users/alex.messina/Documents/GitHub/SD_County_LowFlow/4 - Level calibration files and figures/Data Output 07_25_2019/'
