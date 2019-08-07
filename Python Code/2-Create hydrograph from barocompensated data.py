@@ -34,17 +34,14 @@ pd.set_option('display.max_rows', 20)
 pd.set_option('display.max_columns', 13)
 plt.ion()
 
-os.chdir('F:/github/work/SD_County_LowFlow/')
 #%%
 
 ### UPDATE HERE #####
-<<<<<<< HEAD
 data_processing_date = '07_25_2019' #end date of data
 prev_data_processing_date = '06_30_2019' ## Monthly deliverables ONLY
-=======
+
 data_processing_date = '07_31_2019' #end date of data
 prev_data_processing_date = '07_25_2019' ## Monthly deliverables ONLY
->>>>>>> master
 #####################
 
 maindir = os.getcwd().replace('\\','/') +'/'
@@ -138,19 +135,17 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-<<<<<<< HEAD
 SITE_YOU_WANT_TO_PROCESS = 'SDG-085'
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,22,23,59)
-end = dt.datetime(2019,7,22,23,59)
-=======
+#end = dt.datetime(2019,7,22,23,59)
+
 SITE_YOU_WANT_TO_PROCESS = 'SDR-098'
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,31,23,59)
 #end = dt.datetime(2019,7,22,23,59)
->>>>>>> master
 
 # when you want to cut off calibration points
 cal_start = start
