@@ -8,7 +8,8 @@ Created on Fri May 19 12:11:47 2017
 ## your github repository ie C:\Users\alex.messina\Documents\GitHub\SD_County_LowFlow\ ##
 ## to load modules set working directory to C:\Users\alex.messina\Documents\GitHub\SD_County_LowFlow\Python code\
 
-os.chdir('F:/github/work/SD_County_LowFlow/Python Code/')
+
+import os
 
 # Import Custom Modules
 from Excel_Plots import Excel_Plots    
@@ -22,10 +23,12 @@ import datetime as dt
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 import pandas as pd
-import os
+
 import numpy as np
 import calendar
 from scipy import signal
+
+os.chdir('F:/github/work/SD_County_LowFlow/')
 
 ## Set Pandas display options
 pd.set_option('display.large_repr', 'truncate')
@@ -49,7 +52,7 @@ print 'Main directory is: '+maindir
 ## Input directories
 raindir = maindir+'0 - Rain Data/'
 calibrationdir = maindir+'0 - Field Data Sheets/'
-leveldir = maindir+'1 - Level Data monthly submittals/'
+leveldir = maindir+'1 - Level Data monthly submittals/July Monthly Deliverable/'
 ancillarydir = maindir + '0 - Ancillary files/'
 
 
@@ -64,7 +67,7 @@ calibration_output_dir =      maindir+'4 - Level calibration files and figures/D
 ## Open HvF table
 HvF = pd.read_csv(ancillarydir+'HvF-90degweir.csv',index_col='Level (in)')
 ## WEIR DIMENSIONS FOR OVERTOPPING FLOWS 
-weir_dims = pd.read_excel(ancillarydir+'2019 Weir Dims.xlsx',sheetname='May 2019',index_col='Site', parse_cols='A:J')
+weir_dims = pd.read_excel(ancillarydir+'2019 Weir Dims.xlsx',sheetname='May 2019',index_col='Site', usecols='A:J')
 
 ## Dictionary of rain gauges for each site
 ## Data from  https://sandiego.onerain.com/rain.php
@@ -135,13 +138,16 @@ print ('')
 #%% START HERE - SITE NAME
 
 ## SITE NAME HERE #################
-SITE_YOU_WANT_TO_PROCESS = 'SDG-085'
+
+SITE_YOU_WANT_TO_PROCESS = 'SDR-207'
+
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,22,23,59)
 #end = dt.datetime(2019,7,22,23,59)
 
 SITE_YOU_WANT_TO_PROCESS = 'SDR-098'
+
 
 ### UPDATE HERE #####
 start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,31,23,59)
@@ -161,7 +167,7 @@ if len(files) == 0:
     print 'No data file found in folder!'
     
 for f in files: 
-    #MaxFlow = HvF.ix[np.round(MaxLevel,2)]['Q (GPM)']
+    #MaxFlow = HvF.loc[np.round(MaxLevel,2)]['Q (GPM)']
     print ('')
     print ('Filename: '+f)
     ## Read in the data
@@ -173,7 +179,7 @@ for f in files:
     
     print 'Previous Deliverable file: ' + prev_deliv_dir + prev_deliv_filename
     print
-    del_df = pd.read_excel(prev_deliv_dir+prev_deliv_filename, sheetname=site_name+'-flow',index_col=0,header=0,parse_cols='A:D')
+    del_df = pd.read_excel(prev_deliv_dir+prev_deliv_filename, sheetname=site_name+'-flow',index_col=0,header=0,usecols='A:D')
     
     ## Level data
     WL = pd.read_excel(leveldir+f, skiprows= [0,1], index_col=0, header=0)
@@ -184,10 +190,10 @@ for f in files:
     WL = WL.reindex(index=pd.date_range(start,end,freq='5Min')).interpolate(method='linear',limit=2)
     
 # MANUAL DATA OFFSETS TO GET SERIES TO LINE 
-#    offsets = pd.read_excel('C:/Users/alex.messina/Desktop/CountyWeirProcessing/Offsets and Clip times 05_31_2019_AM.xlsx',sheetname='Offsets',index_col=0,parse_cols='A:G')
+#    offsets = pd.read_excel('C:/Users/alex.messina/Desktop/CountyWeirProcessing/Offsets and Clip times 05_31_2019_AM.xlsx',sheetname='Offsets',index_col=0,usecols='A:G')
 
     ## Open file of offsets
-    offsets = pd.read_excel(hydrograph_fileoutput_dir+'Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Offsets',index_col=0,parse_cols='A:G')
+    offsets = pd.read_excel(hydrograph_fileoutput_dir+'Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Offsets',index_col=0,usecols='A:G')
     
     ## Get offsets for each site
     offsets_list_for_site = offsets[offsets.index  == site_name]
@@ -238,23 +244,23 @@ for f in files:
         print ('Field measurement time:' + str(t))
         try:
             print 'Level data from Meter: '
-            print WL.ix[t]['Level_in']
-            field_meas_level.loc[field_meas_level['Datetime']==t, 'Level_in'] = WL.ix[t]['Level_in']
+            print WL.loc[t]['Level_in']
+            field_meas_level.loc[field_meas_level['Datetime']==t, 'Level_in'] = WL.loc[t]['Level_in']
         except:
             try:
                 ' Shifting calibration time back 5 miutes....'
                 t = t - dt.timedelta(minutes=5)
-                field_meas_level.loc[field_meas_level['Datetime']==t, 'Level_in'] = WL.ix[t]['Level_in']
+                field_meas_level.loc[field_meas_level['Datetime']==t, 'Level_in'] = WL.loc[t]['Level_in']
             except:
                 pass
     
     ## Add the flow that would be predicted from v-notch equation
     try: 
-        field_meas_level.loc[:,'Predicted_flow'] =  [HvF.ix[np.round(x,2)]['Q (GPM)'] for x in field_meas_level['Level_above_V_in'].values]
+        field_meas_level.loc[:,'Predicted_flow'] =  [HvF.loc[np.round(x,2)]['Q (GPM)'] for x in field_meas_level['Level_above_V_in'].values]
 
     except KeyError:
         field_meas_level_nozeros = field_meas_level[field_meas_level['Level_above_V_in'] >=0.]
-        field_meas_level_nozeros.loc[:,'Predicted_flow'] =  [HvF.ix[np.round(x,2)]['Q (GPM)'] for x in field_meas_level_nozeros['Level_above_V_in'].values]
+        field_meas_level_nozeros.loc[:,'Predicted_flow'] =  [HvF.loc[np.round(x,2)]['Q (GPM)'] for x in field_meas_level_nozeros['Level_above_V_in'].values]
 
     ## Calculate average offset from field data
     field_meas_level['calculated offset'] = field_meas_level['Level_above_V_in'] - field_meas_level['Level_in']
@@ -289,7 +295,7 @@ for f in files:
     
     if offset_from_May == True:
         offsets = pd.DataFrame.from_csv(maindir+'offsets_May2019.csv')
-        tot_offset = offsets.ix[site_name]['total_offset']
+        tot_offset = offsets.loc[site_name]['total_offset']
         print ('')
         print ('Total offset calculated for the May 2019 deliverable: '+str(tot_offset))
         print ('...using total offset from May 2019 deliverable...')
@@ -318,14 +324,14 @@ for f in files:
 ###  CALCULATE FLOW
     ## Look up to v-notch flow table and make Flow data from corrected level data
     try:    
-        WL['offset_flow']  = WL['offset_corr_level'].apply(lambda x: HvF.ix[np.round(x,2)]['Q (GPM)'])    
+        WL['offset_flow']  = WL['offset_corr_level'].apply(lambda x: HvF.loc[np.round(x,2)]['Q (GPM)'])    
         
     except KeyError:
         print
         print('KEY ERROR, level value not found!!')
         print
         WL['offset_corr_level'] =  WL['offset_corr_level'][WL['offset_corr_level'] <= 37.5]
-        WL['offset_flow'] =  WL['offset_corr_level'].apply(lambda x: HvF.ix[np.round(x,2)]['Q (GPM)'])    
+        WL['offset_flow'] =  WL['offset_corr_level'].apply(lambda x: HvF.loc[np.round(x,2)]['Q (GPM)'])    
     
     ## Calculate flows when overtopping the weir
     WL['Flow_compound_weir'] = CTRSC_compound_weir(site_name, WL, weir_dims)#,  True, True)
@@ -348,9 +354,9 @@ for f in files:
     rain_1D = rain.resample('1D').sum()
 
 # MANUAL CLIPS OF BAD DATA/STORMFLOW  
-    clips = pd.read_excel(hydrograph_fileoutput_dir+'Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Clips',index_col=0,parse_cols='A:F')   
+    clips = pd.read_excel(hydrograph_fileoutput_dir+'Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Clips',index_col=0,usecols='A:F')   
     # Local copy 'C:/Users/alex.messina/Desktop/CountyWeirProcessing/
-#    clips = pd.read_excel('C:/Users/alex.messina/Desktop/CountyWeirProcessing/Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Clips',index_col=0,parse_cols='A:F')  
+#    clips = pd.read_excel('C:/Users/alex.messina/Desktop/CountyWeirProcessing/Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Clips',index_col=0,usecols='A:F')  
     
     clips_list_for_site = clips[clips.index  == site_name]
 
@@ -467,11 +473,11 @@ for f in files:
 #%% CHECK FIELD LEVEL vs OFFSET LEVEL
 
 meas_vals = field_meas_level.loc[[site_name]][['Datetime','Level_above_V_in']]
-meas_vals['Offset Level Data (in)'] =  meas_vals['Datetime'].apply(lambda x: WL.ix[x]['offset_level_w_neg'])
+meas_vals['Offset Level Data (in)'] =  meas_vals['Datetime'].apply(lambda x: WL.loc[x]['offset_level_w_neg'])
 
 meas_vals_QC = field_meas_level_QC.loc[[site_name]][['Datetime','Level_above_V_in']]
 meas_vals_QC = meas_vals_QC[meas_vals_QC['Datetime']<end]
-meas_vals_QC['Offset Level Data (in)'] =  meas_vals_QC['Datetime'].apply(lambda x: WL.ix[x]['offset_level_w_neg'])
+meas_vals_QC['Offset Level Data (in)'] =  meas_vals_QC['Datetime'].apply(lambda x: WL.loc[x]['offset_level_w_neg'])
 
 ###
 fig, ax = plt.subplots(1,1,figsize=(12,10))
@@ -503,7 +509,7 @@ hover_points(QCpoints, list(meas_vals_QC['Datetime']), fig, ax)
 #%% CHECK FIELD LEVEL vs FLOW MEASUREMENTS
 
 field_meas = fds.loc[[site_name]][['Datetime','Level_above_V_in','Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']]
-field_meas['Predicted_flow'] = [HvF.ix[np.round(x,2)]['Q (GPM)'] for x in field_meas['Level_above_V_in'].values]
+field_meas['Predicted_flow'] = [HvF.loc[np.round(x,2)]['Q (GPM)'] for x in field_meas['Level_above_V_in'].values]
 
 
 meas_vals = pd.DataFrame()
@@ -550,7 +556,7 @@ for col in ['Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']:
     final_flow_vals = final_flow_vals.append(field_meas[['Datetime',col]].rename(columns={col:'Flow_gpm'}))
 final_flow_vals = final_flow_vals[np.isfinite(final_flow_vals['Flow_gpm'])]
 ## Get flow data for the times of the calibration flow measurements
-final_flow_vals['offset_flow'] = final_flow_vals['Datetime'].apply(lambda x: WL.ix[x]['offset_flow'])
+final_flow_vals['offset_flow'] = final_flow_vals['Datetime'].apply(lambda x: WL.loc[x]['offset_flow'])
 
 ## QC measurements  
 field_meas_QC = fds.loc[[site_name]][['Datetime','Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']]
@@ -563,7 +569,7 @@ final_flow_vals_QC = final_flow_vals_QC[np.isfinite(final_flow_vals_QC['Flow_gpm
 
 # Get flow data for the times of the QC flow measurements
 final_flow_vals_QC = final_flow_vals_QC[(final_flow_vals_QC['Datetime']>=dt.datetime(2019,5,31))&(final_flow_vals_QC['Datetime']<=end)]
-final_flow_vals_QC['offset_flow'] = final_flow_vals_QC['Datetime'].apply(lambda x: WL.ix[x]['offset_flow'])
+final_flow_vals_QC['offset_flow'] = final_flow_vals_QC['Datetime'].apply(lambda x: WL.loc[x]['offset_flow'])
 
 ## Calculate flow differences in gpm and %
 final_flow_vals['difference_gpm'] = final_flow_vals['offset_flow'] - final_flow_vals['Flow_gpm']
@@ -603,9 +609,9 @@ hover_points(QCpoints, list(final_flow_vals_QC['Datetime']),fig, ax)
 from xlrd import XLRDError
 
 try:
-    US = pd.read_excel(ancillarydir+'Alta May 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D')
+    US = pd.read_excel(ancillarydir+'Alta May 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,usecols='B:D')
     
-    US = US.append(pd.read_excel(ancillarydir+'Alta June 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
+    US = US.append(pd.read_excel(ancillarydir+'Alta June 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,usecols='B:D'))
     
     
     ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
@@ -661,162 +667,162 @@ except XLRDError:
 
 #%% TEMP AND CONDUCTIVITY
 
-    fig, (ax1, ax2, ax3) = plt.subplots(3,1,sharex=True,figsize=(18,10))
-    
-    ## Temp
-    ax1.plot_date(WL.index, WL[u'°F Water Temperature'],marker='None',ls='-',c='blue',label='Water Temp')
-    ax1.plot_date(WL.index, WL[u'°F Logger Temperature'],marker='None',ls='-',c='tomato',label='Air Temp')
-    
-    ## Cond
-    cond_cals = fds[fds['SITE ID'] == site_name][['Datetime','Specific Conductivity (uS/cm)']].dropna()
-    WL[u'uS/cm EC'] = WL[u'mS/cm EC'] * 1000.
-    ax2.plot_date(WL.index, WL[u'uS/cm EC'],marker='None',ls='-',c='tomato',label='Cond (uS/cm)')
-    ax2.plot_date(cond_cals['Datetime'],cond_cals['Specific Conductivity (uS/cm)'],marker='o',ls='None',color='r',label='Manual measurements')
-    
-    ### Plot precip on inverted, secondary y axis
-    ax2_2 = ax2.twinx()
-    ax2_2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
-    
-    ## Temp, Cond, Flow, precip
-    
-    ## Plot compound weir flow data (including correct flow for overtopping flows)
-    ax3.plot_date(WL.index, WL['Flow_compound_weir'], marker='None',ls='-',c='grey',alpha=0.5,label='Clipped flow data (storm/bad)')
-    ## Plot corrected data (offset and clipped)
-    ax3.plot_date(WL.index, WL['Flow_compound_clipped'], marker='None',ls='-',c='green',label='Corrected Flow, Compound, Clipped')
-    
-    ## Cond
-    ax3_2 = ax3.twinx()
-    ax3_2.plot_date(WL.index, WL[u'uS/cm EC'],marker='None',ls='-',c='tomato',alpha=0.5,label='Cond (uS/cm)')
-    
-    
-    ### Plot precip on inverted, secondary y axis
-    ax3_3 = ax3.twinx()
-    ax3_3.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
-    
-    ## scale
-    ax3.set_ylim(-WL['offset_flow'].max() * 0.1, WL['offset_flow'].max() * 1.1)
-    ax3_2.set_ylim(-WL[u'uS/cm EC'].max() * 0.75, WL[u'uS/cm EC'].max() * 1.1)
-    ax2_2.set_ylim(0, rain['Value'].max() * 3.),ax3_3.set_ylim(0, rain['Value'].max() * 3.)
-    ax2_2.invert_yaxis(), ax3_3.invert_yaxis()
-    
-    
-    ax1.set_xlim(start, end)
-    ax1.set_ylabel(u'Temperature °F ',color='k')
-    ax2.set_ylabel('Sp Conductivity (uS/cm)',color='k'), ax3_2.set_ylabel('Sp Conductivity (uS/cm)',color='k')
-    ax3.set_ylabel('Flow (gpm)',color='k')
-    ax3_3.set_ylabel('Precip (in)')
-    ax3_3.spines["right"].set_position(("axes", 1.1))
-    
-    ax1.legend(fontsize=12,numpoints=1,ncol=1,loc='upper left')
-    ax2.legend(fontsize=12,loc='lower left')
-    ax3.legend(fontsize=12,numpoints=1,ncol=1,loc='lower right')
-    
-    ax3.xaxis.set_major_formatter(mpl.dates.DateFormatter('%A \n %m/%d/%y %H:%M'))
-    
-    fig.suptitle('Data processing for site: '+site_name,fontsize=16,fontweight='bold')
-    plt.tight_layout()
-    plt.subplots_adjust(top=0.95)
+fig, (ax1, ax2, ax3) = plt.subplots(3,1,sharex=True,figsize=(18,10))
+
+## Temp
+ax1.plot_date(WL.index, WL[u'°F Water Temperature'],marker='None',ls='-',c='blue',label='Water Temp')
+ax1.plot_date(WL.index, WL[u'°F Logger Temperature'],marker='None',ls='-',c='tomato',label='Air Temp')
+
+## Cond
+cond_cals = fds[fds['SITE ID'] == site_name][['Datetime','Specific Conductivity (uS/cm)']].dropna()
+WL[u'uS/cm EC'] = WL[u'mS/cm EC'] * 1000.
+ax2.plot_date(WL.index, WL[u'uS/cm EC'],marker='None',ls='-',c='tomato',label='Cond (uS/cm)')
+ax2.plot_date(cond_cals['Datetime'],cond_cals['Specific Conductivity (uS/cm)'],marker='o',ls='None',color='r',label='Manual measurements')
+
+### Plot precip on inverted, secondary y axis
+ax2_2 = ax2.twinx()
+ax2_2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
+
+## Temp, Cond, Flow, precip
+
+## Plot compound weir flow data (including correct flow for overtopping flows)
+ax3.plot_date(WL.index, WL['Flow_compound_weir'], marker='None',ls='-',c='grey',alpha=0.5,label='Clipped flow data (storm/bad)')
+## Plot corrected data (offset and clipped)
+ax3.plot_date(WL.index, WL['Flow_compound_clipped'], marker='None',ls='-',c='green',label='Corrected Flow, Compound, Clipped')
+
+## Cond
+ax3_2 = ax3.twinx()
+ax3_2.plot_date(WL.index, WL[u'uS/cm EC'],marker='None',ls='-',c='tomato',alpha=0.5,label='Cond (uS/cm)')
+
+
+### Plot precip on inverted, secondary y axis
+ax3_3 = ax3.twinx()
+ax3_3.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
+
+## scale
+ax3.set_ylim(-WL['offset_flow'].max() * 0.1, WL['offset_flow'].max() * 1.1)
+ax3_2.set_ylim(-WL[u'uS/cm EC'].max() * 0.75, WL[u'uS/cm EC'].max() * 1.1)
+ax2_2.set_ylim(0, rain['Value'].max() * 3.),ax3_3.set_ylim(0, rain['Value'].max() * 3.)
+ax2_2.invert_yaxis(), ax3_3.invert_yaxis()
+
+
+ax1.set_xlim(start, end)
+ax1.set_ylabel(u'Temperature °F ',color='k')
+ax2.set_ylabel('Sp Conductivity (uS/cm)',color='k'), ax3_2.set_ylabel('Sp Conductivity (uS/cm)',color='k')
+ax3.set_ylabel('Flow (gpm)',color='k')
+ax3_3.set_ylabel('Precip (in)')
+ax3_3.spines["right"].set_position(("axes", 1.1))
+
+ax1.legend(fontsize=12,numpoints=1,ncol=1,loc='upper left')
+ax2.legend(fontsize=12,loc='lower left')
+ax3.legend(fontsize=12,numpoints=1,ncol=1,loc='lower right')
+
+ax3.xaxis.set_major_formatter(mpl.dates.DateFormatter('%A \n %m/%d/%y %H:%M'))
+
+fig.suptitle('Data processing for site: '+site_name,fontsize=16,fontweight='bold')
+plt.tight_layout()
+plt.subplots_adjust(top=0.95)
 
 #%% BASEFLOW SEPARATION
 
-    alpha = 0.990
+alpha = 0.990
 
-    flow_df = WL[[u'Flow_compound_weir']]
-    ## gap fill
-    flow_df = flow_df.fillna(flow_df.interpolate(method='linear')).fillna(flow_df.mode().ix[0].values[0])
-    #flow_df[''Flow_compound_weir'].plot(c='b')
-    
-    ## Function to add original flow peaks back into dataset
-    def peaks(original_flow, smoothed, peak_val=2):
-        if abs(original_flow - smoothed) > peak_val:
-            flow = original_flow
-        else:
-            flow = smoothed
-        return flow
-    
-    ## Smoothing
-    flow_df['rolling'] = flow_df['Flow_compound_weir'].rolling(12,min_periods=3,center=True).mean()
-    #flow_df['rolling'].plot(c='g')
-        
-    ## Add peaks back into rolling data
-    flow_df['rolling+peaks']  = flow_df.apply(lambda x: peaks(x['Flow_compound_weir'],x['rolling']), axis=1)
-    #flow_df['rolling+peaks'].plot(c='r')
+flow_df = WL[[u'Flow_compound_weir']]
+## gap fill
+flow_df = flow_df.fillna(flow_df.interpolate(method='linear')).fillna(flow_df.mode().loc[0].values[0])
+#flow_df[''Flow_compound_weir'].plot(c='b')
 
-    ## Butter filter
-    b, a = signal.butter(3, 0.2, btype='lowpass', analog=False) ## 0.2 parameter selected by trial and error
-    flow_df['butter'] = signal.filtfilt(b, a, flow_df['rolling+peaks'])
-    #flow_df['butter'].plot(c='orange')
-    flow_df['butter+peaks']  = flow_df.apply(lambda x: peaks(x['Flow_compound_weir'],x['butter'], 1.), axis=1)
+## Function to add original flow peaks back into dataset
+def peaks(original_flow, smoothed, peak_val=2):
+    if abs(original_flow - smoothed) > peak_val:
+        flow = original_flow
+    else:
+        flow = smoothed
+    return flow
+
+## Smoothing
+flow_df['rolling'] = flow_df['Flow_compound_weir'].rolling(12,min_periods=3,center=True).mean()
+#flow_df['rolling'].plot(c='g')
+    
+## Add peaks back into rolling data
+flow_df['rolling+peaks']  = flow_df.apply(lambda x: peaks(x['Flow_compound_weir'],x['rolling']), axis=1)
+#flow_df['rolling+peaks'].plot(c='r')
+
+## Butter filter
+b, a = signal.butter(3, 0.2, btype='lowpass', analog=False) ## 0.2 parameter selected by trial and error
+flow_df['butter'] = signal.filtfilt(b, a, flow_df['rolling+peaks'])
+#flow_df['butter'].plot(c='orange')
+flow_df['butter+peaks']  = flow_df.apply(lambda x: peaks(x['Flow_compound_weir'],x['butter'], 1.), axis=1)
 
 
-    ## CHoose a smoothed dataset to apply the DF to
-    flow_df['Flow compound weir (gpm) smooth'] = flow_df['butter+peaks']
-    ## Set arbitrary index
-    flow_df = flow_df.reset_index()
+## CHoose a smoothed dataset to apply the DF to
+flow_df['Flow compound weir (gpm) smooth'] = flow_df['butter+peaks']
+## Set arbitrary index
+flow_df = flow_df.reset_index()
 
-    ## Baseflow df    
-    df = flow_df
-    
-    ## Define h_k1 (original flow data series
-    df['h_k1'] = df['Flow compound weir (gpm) smooth']
-    
-    ### BACKWARD FILTER
-    ## Fill in first value for q_k-1
-    df.loc[0,'q_k-1'] = df.loc[0,'h_k1']
-    ## q_k-1
-    for i in range(1,len(df)):
-        # (0.925 * q_k-1) + (((1+0.925)/2) * (q_k - q_k-1))
-        df.loc[i,'q_k-1'] = (alpha*df.loc[i-1,'q_k-1']) + (((1.+alpha)/2.) * (df.loc[i,'h_k1'] - df.loc[i-1,'h_k1']))
-    
-    ## Change negatives to 0's
-    df['q_k-1>0'] = df['q_k-1'].where(df['q_k-1']>0., 0.)
-    ## b_k1
-    df['b_k1'] = df['h_k1'] - df['q_k-1>0']
-    
-    ## FORWARD FILTER
-    df['h_k2'] = df['h_k1'] - df['b_k1']
-    ## Fill in first value for q_k+1
-    df.loc[df.index[-1],'q_k+1'] = 0.
-    ##q_k+1
-    for i in range(df.index[-2],0,-1): ## iterate backwards
-        # (0.925 * q_k+1) + (((1+0.925)/2) * (q_k - q_k-1))
-        df.loc[i,'q_k+1'] = (alpha*df.loc[i+1,'q_k+1']) + (((1.+alpha)/2.) * (df.loc[i,'b_k1'] - df.loc[i+1,'b_k1']))
-    ## change negatives to 0's
-    df['q_k+1>0'] = df['q_k+1'].where(df['q_k+1']>=0, 0.)
-    ## b_k2
-    df['b_k2'] = df['b_k1'] - df['q_k+1>0']
+## Baseflow df    
+df = flow_df
 
-    ## Rest values back to date
-    df = df.set_index(df['index'])
-    ## Deliver
-    df[['h_k1','b_k1','b_k2']]
-    
-    flowoutput = df[['Flow_compound_weir','Flow compound weir (gpm) smooth']]
-    flowoutput.loc[:,'Baseflow (gpm)'] = df['b_k2']
-    flowoutput.loc[:,'Peakflow (gpm)'] = df['Flow compound weir (gpm) smooth'] - df['b_k2']
-    
-    ## Put in original flow data and Mask where Nan values in orginal dataset
-    flowoutput.loc[:,'Flow_compound_weir'] = WL[[u'Flow_compound_weir']]
-    m = pd.notnull(flowoutput['Flow_compound_weir'])
-    flowoutput = flowoutput.where(m, np.nan)   
-    
-    WL.loc[:,'Baseflow (gpm)'] = flowoutput['Baseflow (gpm)'].round(3)
-    WL.loc[:,'Peakflow (gpm)'] = flowoutput['Peakflow (gpm)'].round(3)
+## Define h_k1 (original flow data series
+df['h_k1'] = df['Flow compound weir (gpm) smooth']
+
+### BACKWARD FILTER
+## Fill in first value for q_k-1
+df.loc[0,'q_k-1'] = df.loc[0,'h_k1']
+## q_k-1
+for i in range(1,len(df)):
+    # (0.925 * q_k-1) + (((1+0.925)/2) * (q_k - q_k-1))
+    df.loc[i,'q_k-1'] = (alpha*df.loc[i-1,'q_k-1']) + (((1.+alpha)/2.) * (df.loc[i,'h_k1'] - df.loc[i-1,'h_k1']))
+
+## Change negatives to 0's
+df['q_k-1>0'] = df['q_k-1'].where(df['q_k-1']>0., 0.)
+## b_k1
+df['b_k1'] = df['h_k1'] - df['q_k-1>0']
+
+## FORWARD FILTER
+df['h_k2'] = df['h_k1'] - df['b_k1']
+## Fill in first value for q_k+1
+df.loc[df.index[-1],'q_k+1'] = 0.
+##q_k+1
+for i in range(df.index[-2],0,-1): ## iterate backwards
+    # (0.925 * q_k+1) + (((1+0.925)/2) * (q_k - q_k-1))
+    df.loc[i,'q_k+1'] = (alpha*df.loc[i+1,'q_k+1']) + (((1.+alpha)/2.) * (df.loc[i,'b_k1'] - df.loc[i+1,'b_k1']))
+## change negatives to 0's
+df['q_k+1>0'] = df['q_k+1'].where(df['q_k+1']>=0, 0.)
+## b_k2
+df['b_k2'] = df['b_k1'] - df['q_k+1>0']
+
+## Rest values back to date
+df = df.set_index(df['index'])
+## Deliver
+df[['h_k1','b_k1','b_k2']]
+
+flowoutput = df[['Flow_compound_weir','Flow compound weir (gpm) smooth']]
+flowoutput.loc[:,'Baseflow (gpm)'] = df['b_k2']
+flowoutput.loc[:,'Peakflow (gpm)'] = df['Flow compound weir (gpm) smooth'] - df['b_k2']
+
+## Put in original flow data and Mask where Nan values in orginal dataset
+flowoutput.loc[:,'Flow_compound_weir'] = WL[[u'Flow_compound_weir']]
+m = pd.notnull(flowoutput['Flow_compound_weir'])
+flowoutput = flowoutput.where(m, np.nan)   
+
+WL.loc[:,'Baseflow (gpm)'] = flowoutput['Baseflow (gpm)'].round(3)
+WL.loc[:,'Peakflow (gpm)'] = flowoutput['Peakflow (gpm)'].round(3)
 
 
 #%% BASEFLOW PLOT
-    ## PLOT
+## PLOT
 #    fig, (ax1,ax2,ax3) = plt.subplots(3,1,figsize=(20,10),sharex=True)
-    fig, ax1 = plt.subplots(1,1)
-    fig.suptitle(site_name,fontsize=14, fontweight='bold')
-    
-    ## Flow
-    ax1.plot_date(WL.index, WL['Flow_compound_weir'],marker='None',ls='-',label='Orig. Flow Data (gpm)',c='grey')
-    ax1.plot_date(flowoutput.index, flowoutput['Flow compound weir (gpm) smooth'],marker='None',ls='-',label='Smoothed Flow Data (gpm)',c='b')
-    ax1.plot_date(WL.index, WL['Baseflow (gpm)'],marker='None',ls='-',label='Baseflow (digital filter='+str(alpha)+')',c='g')
-    ax1.set_ylabel('Flow (gpm)',fontweight='bold',fontsize=14)
-    
-    
+fig, ax1 = plt.subplots(1,1)
+fig.suptitle(site_name,fontsize=14, fontweight='bold')
+
+## Flow
+ax1.plot_date(WL.index, WL['Flow_compound_weir'],marker='None',ls='-',label='Orig. Flow Data (gpm)',c='grey')
+ax1.plot_date(flowoutput.index, flowoutput['Flow compound weir (gpm) smooth'],marker='None',ls='-',label='Smoothed Flow Data (gpm)',c='b')
+ax1.plot_date(WL.index, WL['Baseflow (gpm)'],marker='None',ls='-',label='Baseflow (digital filter='+str(alpha)+')',c='g')
+ax1.set_ylabel('Flow (gpm)',fontweight='bold',fontsize=14)
+
+
 #    ## Spec Conductivity and Water Temp
 #    ax2.plot_date(WL.index, WL[u'mS/cm EC'],marker='None',ls='-',label='Sp Conductivity',c='orange')
 #    ax2.set_ylabel('Spec. Conductivity (mS/cm)',fontweight='bold',fontsize=14)
@@ -824,8 +830,8 @@ except XLRDError:
 #    ax3.plot_date(WL.index, WL[u'kPa Reference Pressure'],marker='None',ls='-',label='Barometric Press.',c='teal')
 #    ax3.set_ylabel('Pressure (kPa)',fontweight='bold',fontsize=14)
 #
-    for ax in fig.axes:
-        ax.legend(loc='upper left')
+for ax in fig.axes:
+    ax.legend(loc='upper left')
 #    
 #    ax2_2 = ax2.twinx()
 #    ax2_2.plot_date(WL.index, WL[u'°F Water Temperature'],marker='None',ls='-',label='Water Temp(F)',c='b')
@@ -837,145 +843,145 @@ except XLRDError:
 #    
 #    for ax in [ax2_2, ax3_2]:
 #        ax.legend(loc='upper right')
-    
-    #ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%m-%d-%Y %H:%M'))
-    ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%m-%d %H:%M'))
-    plt.tight_layout()
-    plt.subplots_adjust(top=0.95,hspace=0.05)
+
+#ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%m-%d-%Y %H:%M'))
+ax.xaxis.set_major_formatter(mpl.dates.DateFormatter('%m-%d %H:%M'))
+plt.tight_layout()
+plt.subplots_adjust(top=0.95,hspace=0.05)
 
 
 #%% SAVE TO EXCEL
 
 ## SAVE EXCEL FILE WITH CALIBRATION DATA
-    calibration_ExcelFile = pd.ExcelWriter(calibration_output_dir+site_name+'-calibration.xlsx')
-    WL.to_excel(calibration_ExcelFile,'Level and Flow data')
-    rain.to_excel(calibration_ExcelFile,'rain')
-    field_meas_flow.to_excel(calibration_ExcelFile,'Flow calibration')
-    field_meas_level.to_excel(calibration_ExcelFile,'Level calibration')
-    
-    offset_df = pd.DataFrame({'calculated_offset':calculated_offset,'overall_offset':overall_offset,'total_offset':tot_offset},index=['offsets']).to_excel(calibration_ExcelFile,'offsets')
-    calibration_ExcelFile.save()
-    
+calibration_ExcelFile = pd.ExcelWriter(calibration_output_dir+site_name+'-calibration.xlsx')
+WL.to_excel(calibration_ExcelFile,'Level and Flow data')
+rain.to_excel(calibration_ExcelFile,'rain')
+field_meas_flow.to_excel(calibration_ExcelFile,'Flow calibration')
+field_meas_level.to_excel(calibration_ExcelFile,'Level calibration')
+
+offset_df = pd.DataFrame({'calculated_offset':calculated_offset,'overall_offset':overall_offset,'total_offset':tot_offset},index=['offsets']).to_excel(calibration_ExcelFile,'offsets')
+calibration_ExcelFile.save()
+
 ### FINALIZED FLOW OUTPUT
 
-    ## FLOW
-    Corr_flow = WL[['offset_flow','Flow_compound_weir','Flow_compound_clipped']].round(2)
-    Corr_flow.columns = ['Flow (gpm)', 'Flow compound weir (gpm)', 'Flow compound weir stormflow clipped (gpm)']
-    
-    ## Add base/peakflow
-    Corr_flow[['Baseflow (gpm)','Peakflow (gpm)']] = WL[['Baseflow (gpm)','Peakflow (gpm)']]
-    
-    ## Add temp and conductivity to deliverable
-    Corr_flow[u'uS/cm EC'] = WL[u'uS/cm EC'].round(0)
-    Corr_flow[u'°F Water Temperature'] = WL[u'°F Water Temperature'].round(1)
-    
-    
-    ## PIVOT TABLE STUFF
-    Corr_flow.loc[:,('Year')] = Corr_flow.index.year
-    Corr_flow.loc[:,('Month')] = Corr_flow.index.month
-    Corr_flow.loc[:,('Day')] = Corr_flow.index.day
-    Corr_flow.loc[:,('Hour')] = Corr_flow.index.hour
-    Corr_flow.loc[:,('Minute')] = Corr_flow.index.minute
-    Corr_flow.loc[:,('Weekday')] = Corr_flow.index.map(lambda x: calendar.day_name[x.weekday()])
-    
-    ## Kick out to Excel
-    final_flow_ExcelFile = pd.ExcelWriter(hydrograph_fileoutput_dir+site_name+'-working draft.xlsx')
-    
-    max_row, rain_max_row = Excel_Plots(site_name, Corr_flow, rain_1D, final_flow_ExcelFile, start, end)
-    
+## FLOW
+Corr_flow = WL[['offset_flow','Flow_compound_weir','Flow_compound_clipped']].round(2)
+Corr_flow.columns = ['Flow (gpm)', 'Flow compound weir (gpm)', 'Flow compound weir stormflow clipped (gpm)']
+
+## Add base/peakflow
+Corr_flow[['Baseflow (gpm)','Peakflow (gpm)']] = WL[['Baseflow (gpm)','Peakflow (gpm)']]
+
+## Add temp and conductivity to deliverable
+Corr_flow[u'uS/cm EC'] = WL[u'uS/cm EC'].round(0)
+Corr_flow[u'°F Water Temperature'] = WL[u'°F Water Temperature'].round(1)
+
+
+## PIVOT TABLE STUFF
+Corr_flow.loc[:,('Year')] = Corr_flow.index.year
+Corr_flow.loc[:,('Month')] = Corr_flow.index.month
+Corr_flow.loc[:,('Day')] = Corr_flow.index.day
+Corr_flow.loc[:,('Hour')] = Corr_flow.index.hour
+Corr_flow.loc[:,('Minute')] = Corr_flow.index.minute
+Corr_flow.loc[:,('Weekday')] = Corr_flow.index.map(lambda x: calendar.day_name[x.weekday()])
+
+## Kick out to Excel
+final_flow_ExcelFile = pd.ExcelWriter(hydrograph_fileoutput_dir+site_name+'-working draft.xlsx')
+
+max_row, rain_max_row = Excel_Plots(site_name, Corr_flow, rain_1D, final_flow_ExcelFile, start, end)
+
 ### Pivot TABLES
 
-    ## Old style
-    PivotTable_Sum = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.sum)  
-    PivotTable_Sum.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Sum')
-    
-    ## Seven day Average style
-    PivotTable = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)',columns=['Weekday'],index=['Hour'],aggfunc=np.mean)
-    col_order=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
-    PivotTable = PivotTable.reindex_axis(col_order,axis=1)
-    
-    PivotTable.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Avg')
-    
-    ## Format Pivot Table 
-    pivot = final_flow_ExcelFile.sheets[site_name+'PivotTable-Avg']
-    
-    ## Conditional formatting
-    # Add a format. Yellow fill with RED text.
-    redtxt = final_flow_ExcelFile.book.add_format({'bg_color': '#FFFF00',
-                               'font_color': '#FF0000'})
-    # Add a format. Yellow fill with black text.
-    blacktxt = final_flow_ExcelFile.book.add_format({'bg_color': '#FFFF00',
-                               'font_color': '#000000'})
+## Old style
+PivotTable_Sum = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.sum)  
+PivotTable_Sum.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Sum')
 
-    day_cols={'Monday':'B','Tuesday':'C','Wednesday':'D','Thursday':'E','Friday':'F','Saturday':'G','Sunday':'H'}
-    col_order=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+## Seven day Average style
+PivotTable = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)',columns=['Weekday'],index=['Hour'],aggfunc=np.mean)
+col_order=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+PivotTable = PivotTable.reindex_axis(col_order,axis=1)
+
+PivotTable.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Avg')
+
+## Format Pivot Table 
+pivot = final_flow_ExcelFile.sheets[site_name+'PivotTable-Avg']
+
+## Conditional formatting
+# Add a format. Yellow fill with RED text.
+redtxt = final_flow_ExcelFile.book.add_format({'bg_color': '#FFFF00',
+                           'font_color': '#FF0000'})
+# Add a format. Yellow fill with black text.
+blacktxt = final_flow_ExcelFile.book.add_format({'bg_color': '#FFFF00',
+                           'font_color': '#000000'})
+
+day_cols={'Monday':'B','Tuesday':'C','Wednesday':'D','Thursday':'E','Friday':'F','Saturday':'G','Sunday':'H'}
+col_order=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
+
+for index, letter in enumerate(string.ascii_uppercase[1:9]):
+    ## Count cells over 25th percentile
+    pivot.write_formula(25,index, '=SUMPRODUCT(--('+letter+'2:'+letter+'25>PERCENTILE($B$2:$H$25,0.85)))')
     
-    for index, letter in enumerate(string.ascii_uppercase[1:9]):
-        ## Count cells over 25th percentile
-        pivot.write_formula(25,index, '=SUMPRODUCT(--('+letter+'2:'+letter+'25>PERCENTILE($B$2:$H$25,0.85)))')
-        
+
+## Annotate
+pivot.write(25,0, 'Count>15% by day')
+pivot.write(26,3, 'Count>15% by day')
+
+for i, day in zip(np.arange(27,34,1),col_order):
+    col = day_cols[day]
+    print i, day, col        
+    pivot.write(i,0,day)
+    pivot.write_formula(i,1,'=AVERAGE('+col+'2:'+col+'25)')
+    pivot.write(i,2,'>Avg')
+    pivot.write_formula(i,3,'=SUM('+col+'26)')
     
-    ## Annotate
-    pivot.write(25,0, 'Count>15% by day')
-    pivot.write(26,3, 'Count>15% by day')
+    ## Conditionally format each day
+    pivot.conditional_format(col+'2:'+col+'25', {'type': 'cell','criteria': '>=','value':'$B$35','format': redtxt})
+    pivot.conditional_format(col+'2:'+col+'25', {'type': 'cell','criteria': '>=','value':'$B$'+str(i+1),'format': blacktxt})
     
-    for i, day in zip(np.arange(27,34,1),col_order):
-        col = day_cols[day]
-        print i, day, col        
-        pivot.write(i,0,day)
-        pivot.write_formula(i,1,'=AVERAGE('+col+'2:'+col+'25)')
-        pivot.write(i,2,'>Avg')
-        pivot.write_formula(i,3,'=SUM('+col+'26)')
-        
-        ## Conditionally format each day
-        pivot.conditional_format(col+'2:'+col+'25', {'type': 'cell','criteria': '>=','value':'$B$35','format': redtxt})
-        pivot.conditional_format(col+'2:'+col+'25', {'type': 'cell','criteria': '>=','value':'$B$'+str(i+1),'format': blacktxt})
-        
-      
-    pivot.write(34,0,'Top 15th%ile (excluding zeros)')
-    pivot.write_formula(34,1,'=PERCENTILE(IF(B2:H25>0, B2:H25), 0.85)')
-    pivot.write(34,2,'>15th%ile excl 0s')
-    pivot.write(34,3,'(need to hit F2, then Ctrl+Shift+Enter to execute equation if you edit it)')
-    
-    pivot.write(35,0,'Top 15th%ile (including zeros)')
-    pivot.write_formula(35,1,'=PERCENTILE(B2:H25,0.85)')
-    pivot.write(35,2,'>15th%ile incl 0s')
+  
+pivot.write(34,0,'Top 15th%ile (excluding zeros)')
+pivot.write_formula(34,1,'=PERCENTILE(IF(B2:H25>0, B2:H25), 0.85)')
+pivot.write(34,2,'>15th%ile excl 0s')
+pivot.write(34,3,'(need to hit F2, then Ctrl+Shift+Enter to execute equation if you edit it)')
+
+pivot.write(35,0,'Top 15th%ile (including zeros)')
+pivot.write_formula(35,1,'=PERCENTILE(B2:H25,0.85)')
+pivot.write(35,2,'>15th%ile incl 0s')
 
 ### SAVE FINAL FILE
-    final_flow_ExcelFile.save()
+final_flow_ExcelFile.save()
 
 
 # Final Hydrograph    
 
-    fig, ax1 = plt.subplots(1,1,figsize = (14,8))
-    ## FLOW
-    ax1.plot_date(Corr_flow.index, Corr_flow['Flow compound weir (gpm)'], marker='None', ls='-', c='grey',alpha=0.2,label='Stormflow, clipped, compound weir')
-    ax1.plot_date(Corr_flow.index, Corr_flow['Flow compound weir stormflow clipped (gpm)'], marker='None', ls='-', c='b',label='Flow, compound weir')
-    ## BASEFLOW
-    ax1.plot_date(Corr_flow.index,Corr_flow['Baseflow (gpm)'], marker='None', ls='-', c='grey',label='Baseflow')
-    
-    ## RAIN
-    ax2 = ax1.twinx()
-    ax2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='skyblue',label='Precip: '+raingauge_dict[site_name])
-    ## FORMAT
-    ax1.set_ylim(-Corr_flow['Flow compound weir stormflow clipped (gpm)'].max() * 0.25, Corr_flow['Flow compound weir stormflow clipped (gpm)'].max() * 2.)
-    ax2.set_ylim(0, rain['Value'].max() * 3.)
-    ax2.invert_yaxis()
-    ## LEGEND
-    ax1.legend(fontsize=12,loc='lower left'), ax2.legend(fontsize=12,loc='lower right')
-    
-    ax1.set_ylabel('Flow (gpm)'), ax2.set_ylabel('Precip (inches)')
-    ax1.xaxis.set_major_formatter(mpl.dates.DateFormatter('%A \n %m/%d/%y %H:%M'))
-    plt.xticks(rotation=90)
-    
-    ## set x-axis to monitoring period
-    ax1.set_xlim(start, end)
-    
-    fig.suptitle('Working Draft Hydrograph for site: '+site_name,fontsize=16,fontweight='bold')
-    plt.tight_layout()
-    plt.subplots_adjust(top=0.95)
+fig, ax1 = plt.subplots(1,1,figsize = (14,8))
+## FLOW
+ax1.plot_date(Corr_flow.index, Corr_flow['Flow compound weir (gpm)'], marker='None', ls='-', c='grey',alpha=0.2,label='Stormflow, clipped, compound weir')
+ax1.plot_date(Corr_flow.index, Corr_flow['Flow compound weir stormflow clipped (gpm)'], marker='None', ls='-', c='b',label='Flow, compound weir')
+## BASEFLOW
+ax1.plot_date(Corr_flow.index,Corr_flow['Baseflow (gpm)'], marker='None', ls='-', c='grey',label='Baseflow')
 
-    fig.savefig(hydrograph_figureoutput_dir+'Hydrographs/'+site_name+'-working hydrograph.png')
+## RAIN
+ax2 = ax1.twinx()
+ax2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='skyblue',label='Precip: '+raingauge_dict[site_name])
+## FORMAT
+ax1.set_ylim(-Corr_flow['Flow compound weir stormflow clipped (gpm)'].max() * 0.25, Corr_flow['Flow compound weir stormflow clipped (gpm)'].max() * 2.)
+ax2.set_ylim(0, rain['Value'].max() * 3.)
+ax2.invert_yaxis()
+## LEGEND
+ax1.legend(fontsize=12,loc='lower left'), ax2.legend(fontsize=12,loc='lower right')
+
+ax1.set_ylabel('Flow (gpm)'), ax2.set_ylabel('Precip (inches)')
+ax1.xaxis.set_major_formatter(mpl.dates.DateFormatter('%A \n %m/%d/%y %H:%M'))
+plt.xticks(rotation=90)
+
+## set x-axis to monitoring period
+ax1.set_xlim(start, end)
+
+fig.suptitle('Working Draft Hydrograph for site: '+site_name,fontsize=16,fontweight='bold')
+plt.tight_layout()
+plt.subplots_adjust(top=0.95)
+
+fig.savefig(hydrograph_figureoutput_dir+'Hydrographs/'+site_name+'-working hydrograph.png')
 #%% HEAT MAPS
 ## HEAT MAP Averaged by Weekday
 #
