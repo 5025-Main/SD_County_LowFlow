@@ -312,7 +312,7 @@ for f in files:
         WL['offset_corr_level'] = WL['offset_corr_level'].where(WL['offset_corr_level']>= 0., np.nan)
         
     ## Get rid of data dropouts
-    WL['offset_corr_level'] = np.where(WL['Level_in'].isnull(),np.nan,0,WL['offset_corr_level'])
+    WL['offset_corr_level'] = np.where(WL['Level_in'].isnull(),np.nan,WL['offset_corr_level'])
  
 ###  CALCULATE FLOW
     ## Look up to v-notch flow table and make Flow data from corrected level data
