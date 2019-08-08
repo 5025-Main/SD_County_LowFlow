@@ -8,20 +8,20 @@ import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+from scipy import ndimage
 import numpy as np
 import os
 from PIL import Image
 import datetime as dt
-
 ### CHOO CHOO CHOOse your site
-site = 'CAR-070'
+site = 'CAR-072'
 
 ## Using github directory
 flow_dir = hydrograph_fileoutput_dir
 level_dir = calibration_output_dir 
 ## Hardcoding directories
-flow_dir = 'C:/Users/alex.messina/Documents/GitHub/SD_County_LowFlow/2 - Flow output Excel files - working drafts/Data Output 07_25_2019/'
-level_dir = 'C:/Users/alex.messina/Documents/GitHub/SD_County_LowFlow/4 - Level calibration files and figures/Data Output 07_25_2019/'
+#flow_dir = 'C:/Users/alex.messina/Documents/GitHub/SD_County_LowFlow/2 - Flow output Excel files - working drafts/Data Output 07_25_2019/'
+#level_dir = 'C:/Users/alex.messina/Documents/GitHub/SD_County_LowFlow/4 - Level calibration files and figures/Data Output 07_25_2019/'
 ##
 flow_filename = [f for f in os.listdir(flow_dir) if f.split('-working draft.xlsx')[0]==site][0]
 flow_df = pd.read_excel(flow_dir+flow_filename,sheetname=site+'-flow')
@@ -32,16 +32,27 @@ level_df = pd.read_excel(level_dir+level_filename,sheetname='Level and Flow data
 pic_dir = 'C:/Users/alex.messina/Downloads/'
 pic_folder = site + '/'
 
+#%%
+pic_datetimes = pd.DataFrame()
+for pic in [os.listdir(pic_dir+pic_folder)][0]:
+    date_taken = Image.open(pic_dir+pic_folder + pic)._getexif()[36867]
+    t = dt.datetime.strptime(date_taken, '%Y:%m:%d %H:%M:%S')
+    pic_datetimes = pic_datetimes.append(pd.DataFrame({'Pic filename':pic,'Date Taken':t},index=[t]))
+    
 
 #%%
 
 # define your images to be plotted
-pics = [os.listdir(pic_dir+pic_folder)][0][900:] ## You can limit photos here
+#pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
+
+## Select by date
+pics = pic_datetimes[dt.datetime(2019,7,1):]['Pic filename']
 
 # now the real code :) 
 curr_pos = 0
 
 def key_event(e):
+    
     global curr_pos
 
     if e.key == "right":
@@ -70,7 +81,11 @@ def key_event(e):
     ax1.set_title('SITE: '+site+' Datetime: '+t.strftime('%m/%d/%y %H:%M') +' Pic: '+pics[curr_pos])
     img=mpimg.imread(picture_file)
     # from now on you can use img as an image, but make sure you know what you are doing!
-    imgplot=ax1.imshow(img)
+    if site == 'CAR-070':
+        rot_img=ndimage.rotate(img,degrees)
+        imgplot=ax1.imshow(rot_img)
+    else:
+        imgplot=ax1.imshow(img)
     plt.show()
     
     ## Plot flow data
@@ -104,8 +119,6 @@ def key_event(e):
     ax2_2.legend(loc='upper right')
         
     fig.canvas.draw()
-    print 'done'
-    
     return
 
 
@@ -126,7 +139,12 @@ ax1 = plt.subplot(211)
 ax1.set_title('SITE: '+site+' Datetime: '+t.strftime('%m/%d/%y %H:%M'))
 img=mpimg.imread(picture_file)
 # from now on you can use img as an image, but make sure you know what you are doing!
-imgplot=plt.imshow(img)
+if site == 'CAR-070':
+    degrees = -90
+    rot_img=ndimage.rotate(img,degrees)
+    imgplot=plt.imshow(rot_img)
+else: 
+    imgplot=plt.imshow(img)
 plt.show()
 
 ax2 = plt.subplot(212)

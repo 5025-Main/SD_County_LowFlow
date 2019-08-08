@@ -28,7 +28,6 @@ import numpy as np
 import calendar
 from scipy import signal
 
-os.chdir('F:/github/work/SD_County_LowFlow/')
 
 ## Set Pandas display options
 pd.set_option('display.large_repr', 'truncate')
@@ -40,9 +39,6 @@ plt.ion()
 #%%
 
 ### UPDATE HERE #####
-data_processing_date = '07_25_2019' #end date of data
-prev_data_processing_date = '06_30_2019' ## Monthly deliverables ONLY
-
 data_processing_date = '07_31_2019' #end date of data
 prev_data_processing_date = '07_25_2019' ## Monthly deliverables ONLY
 #####################
@@ -67,7 +63,7 @@ calibration_output_dir =      maindir+'4 - Level calibration files and figures/D
 ## Open HvF table
 HvF = pd.read_csv(ancillarydir+'HvF-90degweir.csv',index_col='Level (in)')
 ## WEIR DIMENSIONS FOR OVERTOPPING FLOWS 
-weir_dims = pd.read_excel(ancillarydir+'2019 Weir Dims.xlsx',sheetname='May 2019',index_col='Site', usecols='A:J')
+weir_dims = pd.read_excel(ancillarydir+'2019 Weir Dims.xlsx',sheetname='May 2019',index_col='Site', parse_cols='A:J')
 
 ## Dictionary of rain gauges for each site
 ## Data from  https://sandiego.onerain.com/rain.php
@@ -139,12 +135,6 @@ print ('')
 
 ## SITE NAME HERE #################
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-207'
-
-
-### UPDATE HERE #####
-start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,22,23,59)
-#end = dt.datetime(2019,7,22,23,59)
 
 SITE_YOU_WANT_TO_PROCESS = 'SDR-098'
 
@@ -316,10 +306,13 @@ for f in files:
         
     elif negative_level_as_zero_flow == 'False' or negative_level_as_zero_flow == False:
         print ('Negative Levels are NaN (no data during downloading)')
-        WL['offset_corr_level'] = WL['offset_corr_level'].where((WL['offset_corr_level']>= 0.), np.nan)
+        WL['offset_corr_level'] = WL['offset_corr_level'].where(WL['offset_corr_level']>= 0., np.nan)
     else:
         print ('Negative Levels NOT SET')
-        WL['offset_corr_level'] = WL['offset_corr_level'].where((WL['offset_corr_level']>= 0.), np.nan)
+        WL['offset_corr_level'] = WL['offset_corr_level'].where(WL['offset_corr_level']>= 0., np.nan)
+        
+    ## Get rid of data dropouts
+    WL['offset_corr_level'] = np.where(WL['Level_in'].isnull(),np.nan,0,WL['offset_corr_level'])
  
 ###  CALCULATE FLOW
     ## Look up to v-notch flow table and make Flow data from corrected level data
