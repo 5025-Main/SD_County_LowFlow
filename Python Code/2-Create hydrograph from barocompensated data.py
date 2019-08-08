@@ -40,7 +40,7 @@ plt.ion()
 
 ### UPDATE HERE #####
 data_processing_date = '07_31_2019' #end date of data
-prev_data_processing_date = '07_25_2019' ## Monthly deliverables ONLY
+prev_data_processing_date = '05_31_2019' ## Monthly deliverables ONLY
 #####################
 
 maindir = os.getcwd().replace('\\','/') +'/'
@@ -48,7 +48,7 @@ print 'Main directory is: '+maindir
 ## Input directories
 raindir = maindir+'0 - Rain Data/'
 calibrationdir = maindir+'0 - Field Data Sheets/'
-leveldir = maindir+'1 - Level Data monthly submittals/July Monthly Deliverable/'
+leveldir = maindir+'1 - Level Data monthly submittals/'
 ancillarydir = maindir + '0 - Ancillary files/'
 
 
@@ -59,6 +59,7 @@ prev_deliv_dir = maindir+'2 - Flow output Excel files - working drafts/Data Outp
 hydrograph_fileoutput_dir =   maindir+'2 - Flow output Excel files - working drafts/Data Output '+data_processing_date+'/'
 hydrograph_figureoutput_dir = maindir+'3 - Flow output figures - working hydrographs/Data Output '+data_processing_date+'/'
 calibration_output_dir =      maindir+'4 - Level calibration files and figures/Data Output '+data_processing_date+'/'
+
 
 ## Open HvF table
 HvF = pd.read_csv(ancillarydir+'HvF-90degweir.csv',index_col='Level (in)')
@@ -136,7 +137,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-204A'
+SITE_YOU_WANT_TO_PROCESS = 'SLR-045A'
 
 
 ### UPDATE HERE #####
@@ -429,7 +430,7 @@ for f in files:
     ax4.plot_date(field_meas_flow_QC['Datetime'],field_meas_flow_QC['Flow_gpm_3'],marker='o',c='b',label='Field meas. flow 3')
     
     ## Previous deliverable data
-    ax4.plot_date(del_df.index,del_df['Flow compound weir (gpm)'], marker='None',ls='-',c='b',label='Previous deliverable')
+    #ax4.plot_date(del_df.index,del_df['Flow compound weir (gpm)'], marker='None',ls='-',c='b',label='Previous deliverable')
    
     ### Plot precip on inverted, secondary y axis
     ax4_2 = ax4.twinx()
@@ -850,7 +851,12 @@ plt.subplots_adjust(top=0.95,hspace=0.05)
 
 ## Get rid of all data for data dropouts
 for col in WL.columns:
-    WL[col] = np.where(WL['Level_in'].isnull(),np.nan,WL[col])
+    print col
+    try:
+        WL[col] = np.where(WL['Level_in'].isnull(),np.nan,WL[col])
+    except:
+        print 'skipped col: '+col
+        pass
 
 ## SAVE EXCEL FILE WITH CALIBRATION DATA
 calibration_ExcelFile = pd.ExcelWriter(calibration_output_dir+site_name+'-calibration.xlsx')

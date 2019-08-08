@@ -32,13 +32,14 @@ level_df = pd.read_excel(level_dir+level_filename,sheetname='Level and Flow data
 pic_dir = 'C:/Users/alex.messina/Downloads/'
 pic_folder = site + '/'
 
-#%%
+## Compile DF of datetimes and picture file names
+print ' compiling datetimes and picture file names....'
 pic_datetimes = pd.DataFrame()
 for pic in [os.listdir(pic_dir+pic_folder)][0]:
     date_taken = Image.open(pic_dir+pic_folder + pic)._getexif()[36867]
     t = dt.datetime.strptime(date_taken, '%Y:%m:%d %H:%M:%S')
     pic_datetimes = pic_datetimes.append(pd.DataFrame({'Pic filename':pic,'Date Taken':t},index=[t]))
-    
+print 'datetimes and picture file names....DONE'   
 
 #%%
 
@@ -46,7 +47,7 @@ for pic in [os.listdir(pic_dir+pic_folder)][0]:
 #pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
 
 ## Select by date
-pics = pic_datetimes[dt.datetime(2019,7,1):]['Pic filename']
+pics = pic_datetimes[dt.datetime(2019,6,27):]['Pic filename']
 
 # now the real code :) 
 curr_pos = 0
@@ -181,24 +182,5 @@ ax2.xaxis.set_major_formatter(mpl.dates.DateFormatter('%A \n %m/%d/%y %H:%M'))
 
 plt.tight_layout()
 
-
-
-
-
-
-
-
-
 #%%
-
-
-
-
-
-
-
-
-
-
-
 
