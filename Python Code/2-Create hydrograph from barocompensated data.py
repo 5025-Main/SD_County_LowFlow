@@ -802,6 +802,9 @@ flowoutput = flowoutput.where(m, np.nan)
 WL.loc[:,'Baseflow (gpm)'] = flowoutput['Baseflow (gpm)'].round(3)
 WL.loc[:,'Peakflow (gpm)'] = flowoutput['Peakflow (gpm)'].round(3)
 
+## Drop data for data dropouts
+WL['Baseflow (gpm)'] = np.where(WL['Level_in'].isnull(),np.nan,WL['Baseflow (gpm)'])
+WL['Peakflow (gpm)'] = np.where(WL['Level_in'].isnull(),np.nan,WL['Peakflow (gpm)'])
 
 #%% BASEFLOW PLOT
 ## PLOT
@@ -844,6 +847,10 @@ plt.subplots_adjust(top=0.95,hspace=0.05)
 
 
 #%% SAVE TO EXCEL
+
+## Get rid of all data for data dropouts
+for col in WL.columns:
+    WL[col] = np.where(WL['Level_in'].isnull(),np.nan,WL[col])
 
 ## SAVE EXCEL FILE WITH CALIBRATION DATA
 calibration_ExcelFile = pd.ExcelWriter(calibration_output_dir+site_name+'-calibration.xlsx')
