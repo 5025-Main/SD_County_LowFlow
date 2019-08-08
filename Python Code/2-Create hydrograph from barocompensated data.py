@@ -136,7 +136,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-098'
+SITE_YOU_WANT_TO_PROCESS = 'SDR-204A'
 
 
 ### UPDATE HERE #####
@@ -169,7 +169,7 @@ for f in files:
     
     print 'Previous Deliverable file: ' + prev_deliv_dir + prev_deliv_filename
     print
-    del_df = pd.read_excel(prev_deliv_dir+prev_deliv_filename, sheetname=site_name+'-flow',index_col=0,header=0,usecols='A:D')
+    del_df = pd.read_excel(prev_deliv_dir+prev_deliv_filename, sheetname=site_name+'-flow',index_col=0,header=0,parse_cols='A:D')
     
     ## Level data
     WL = pd.read_excel(leveldir+f, skiprows= [0,1], index_col=0, header=0)
@@ -180,10 +180,10 @@ for f in files:
     WL = WL.reindex(index=pd.date_range(start,end,freq='5Min')).interpolate(method='linear',limit=2)
     
 # MANUAL DATA OFFSETS TO GET SERIES TO LINE 
-#    offsets = pd.read_excel('C:/Users/alex.messina/Desktop/CountyWeirProcessing/Offsets and Clip times 05_31_2019_AM.xlsx',sheetname='Offsets',index_col=0,usecols='A:G')
+#    offsets = pd.read_excel('C:/Users/alex.messina/Desktop/CountyWeirProcessing/Offsets and Clip times 05_31_2019_AM.xlsx',sheetname='Offsets',index_col=0,parse_cols='A:G')
 
     ## Open file of offsets
-    offsets = pd.read_excel(hydrograph_fileoutput_dir+'Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Offsets',index_col=0,usecols='A:G')
+    offsets = pd.read_excel(hydrograph_fileoutput_dir+'Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Offsets',index_col=0,parse_cols='A:G')
     
     ## Get offsets for each site
     offsets_list_for_site = offsets[offsets.index  == site_name]
@@ -347,9 +347,9 @@ for f in files:
     rain_1D = rain.resample('1D').sum()
 
 # MANUAL CLIPS OF BAD DATA/STORMFLOW  
-    clips = pd.read_excel(hydrograph_fileoutput_dir+'Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Clips',index_col=0,usecols='A:F')   
+    clips = pd.read_excel(hydrograph_fileoutput_dir+'Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Clips',index_col=0,parse_cols='A:F')   
     # Local copy 'C:/Users/alex.messina/Desktop/CountyWeirProcessing/
-#    clips = pd.read_excel('C:/Users/alex.messina/Desktop/CountyWeirProcessing/Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Clips',index_col=0,usecols='A:F')  
+#    clips = pd.read_excel('C:/Users/alex.messina/Desktop/CountyWeirProcessing/Offsets and Clip times '+data_processing_date+'.xlsx',sheetname='Clips',index_col=0,parse_cols='A:F')  
     
     clips_list_for_site = clips[clips.index  == site_name]
 
@@ -602,9 +602,9 @@ hover_points(QCpoints, list(final_flow_vals_QC['Datetime']),fig, ax)
 from xlrd import XLRDError
 
 try:
-    US = pd.read_excel(ancillarydir+'Alta May 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,usecols='B:D')
+    US = pd.read_excel(ancillarydir+'Alta May 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D')
     
-    US = US.append(pd.read_excel(ancillarydir+'Alta June 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,usecols='B:D'))
+    US = US.append(pd.read_excel(ancillarydir+'Alta June 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
     
     
     ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
