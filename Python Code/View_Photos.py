@@ -14,7 +14,7 @@ import os
 from PIL import Image
 import datetime as dt
 ### CHOO CHOO CHOOse your site
-site = 'CAR-072'
+site = 'SLR-045A'
 
 ## Using github directory
 flow_dir = hydrograph_fileoutput_dir
