@@ -343,8 +343,10 @@ for f in files:
     rainfile = [s for s in os.listdir(raindir+'Raw Data/') if raingauge_dict[site_name] in s][0]
     print ('')
     print ('Site: '+site_name+'  Precip file: '+rainfile)
-    rain = pd.read_excel(raindir+'Raw Data/'+rainfile)
-    rain.index = pd.to_datetime(rain['Reading'])
+    rain = pd.read_excel(raindir+'Raw Data/'+rainfile,index_col=0)
+    rain = rain.rename(columns={'Value':'Precip_in'})
+    rain.index.names = ['Datetime']
+    rain.index = pd.to_datetime(rain.index)
     ## Resample to regular interval and fill non-data with zeros
     rain = rain.resample('15Min').sum()
     rain  = rain.fillna(0.)
@@ -414,7 +416,7 @@ for f in files:
 
     ### Plot precip on inverted, secondary y axis
     ax3 = ax2.twinx()
-    ax3.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
+    ax3.plot_date(rain.index, rain['Precip_in'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
     
     ## Plot all flow data as greyed out bad data
     #ax4.plot_date(WL.index, WL['offset_flow'], marker='None',ls='-',c='red',alpha=0.5,label='Simple V flow')
@@ -437,14 +439,14 @@ for f in files:
    
     ### Plot precip on inverted, secondary y axis
     ax4_2 = ax4.twinx()
-    ax4_2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
+    ax4_2.plot_date(rain.index, rain['Precip_in'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
     
     ## Format/set limits
     ## full scale flow
     ax1.set_ylim(-3, WL['Level_in'].max() * 1.1)
     #ax2.set_ylim(-WL['offset_flow'].max() * 0.5, WL['offset_flow'].max() * 2.)
-    ax3.set_ylim(0, rain['Value'].max() * 2.)
-    ax4_2.set_ylim(0, rain['Value'].max() * 3.)
+    ax3.set_ylim(0, rain['Precip_in'].max() * 2.)
+    ax4_2.set_ylim(0, rain['Precip_in'].max() * 3.)
     ax3.invert_yaxis(), ax4_2.invert_yaxis()
     
     ## low flow
@@ -647,7 +649,7 @@ try:
     
     ### Plot precip on inverted, secondary y axis
     ax1_2 = ax1.twinx()
-    ax1_2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='b',label='Precip: '+raingauge_dict[site_name])
+    ax1_2.plot_date(rain.index, rain['Precip_in'], marker='None',ls='steps-mid',color='b',label='Precip: '+raingauge_dict[site_name])
     ax1_2.set_ylabel('Precip (inches)',color='teal')
     ax1_2.invert_yaxis()
     ax1_2.legend()
@@ -678,7 +680,7 @@ ax2.plot_date(cond_cals['Datetime'],cond_cals['Specific Conductivity (uS/cm)'],m
 
 ### Plot precip on inverted, secondary y axis
 ax2_2 = ax2.twinx()
-ax2_2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
+ax2_2.plot_date(rain.index, rain['Precip_in'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
 
 ## Temp, Cond, Flow, precip
 
@@ -694,12 +696,12 @@ ax3_2.plot_date(WL.index, WL[u'uS/cm EC'],marker='None',ls='-',c='tomato',alpha=
 
 ### Plot precip on inverted, secondary y axis
 ax3_3 = ax3.twinx()
-ax3_3.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
+ax3_3.plot_date(rain.index, rain['Precip_in'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
 
 ## scale
 ax3.set_ylim(-WL['offset_flow'].max() * 0.1, WL['offset_flow'].max() * 1.1)
 ax3_2.set_ylim(-WL[u'uS/cm EC'].max() * 0.75, WL[u'uS/cm EC'].max() * 1.1)
-ax2_2.set_ylim(0, rain['Value'].max() * 3.),ax3_3.set_ylim(0, rain['Value'].max() * 3.)
+ax2_2.set_ylim(0, rain['Precip_in'].max() * 3.),ax3_3.set_ylim(0, rain['Precip_in'].max() * 3.)
 ax2_2.invert_yaxis(), ax3_3.invert_yaxis()
 
 
@@ -971,10 +973,10 @@ ax1.plot_date(Corr_flow.index,Corr_flow['Baseflow (gpm)'], marker='None', ls='-'
 
 ## RAIN
 ax2 = ax1.twinx()
-ax2.plot_date(rain.index, rain['Value'], marker='None',ls='steps-mid',color='skyblue',label='Precip: '+raingauge_dict[site_name])
+ax2.plot_date(rain.index, rain['Precip_in'], marker='None',ls='steps-mid',color='skyblue',label='Precip: '+raingauge_dict[site_name])
 ## FORMAT
 ax1.set_ylim(-Corr_flow['Flow compound weir stormflow clipped (gpm)'].max() * 0.25, Corr_flow['Flow compound weir stormflow clipped (gpm)'].max() * 2.)
-ax2.set_ylim(0, rain['Value'].max() * 3.)
+ax2.set_ylim(0, rain['Precip_in'].max() * 3.)
 ax2.invert_yaxis()
 ## LEGEND
 ax1.legend(fontsize=12,loc='lower left'), ax2.legend(fontsize=12,loc='lower right')
