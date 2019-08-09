@@ -856,7 +856,7 @@ plt.subplots_adjust(top=0.95,hspace=0.05)
 
 ## Get rid of all data for data dropouts
 for col in WL.columns:
-    print col
+    #print col
     try:
         WL[col] = np.where(WL['Level_in'].isnull(),np.nan,WL[col])
     except:
@@ -902,19 +902,26 @@ max_row, rain_max_row = Excel_Plots(site_name, Corr_flow, rain_1D, final_flow_Ex
 
 ### Pivot TABLES
 
-## Old style
-PivotTable_Sum = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.sum)  
+## Old style-SUM
+PivotTable_Sum = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.sum).round(1)
 PivotTable_Sum.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Sum')
+final_flow_ExcelFile.sheets[site_name+'PivotTable-Sum'].freeze_panes(4, 1)
+final_flow_ExcelFile.sheets[site_name+'PivotTable-Sum'].conditional_format('B5:G83', {'type': '3_color_scale','min_color': "gree",'mid_color': "yellow",'max_color': "red"})
+## Old style-AVG
+PivotTable_Avg = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.mean).round(3)
+PivotTable_Avg.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Avg')
+final_flow_ExcelFile.sheets[site_name+'PivotTable-Avg'].freeze_panes(4, 1)
+final_flow_ExcelFile.sheets[site_name+'PivotTable-Avg'].conditional_format('G2:G83', {'type': '3_color_scale','min_color': "gree",'mid_color': "yellow",'max_color': "red"})
 
 ## Seven day Average style
 PivotTable = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)',columns=['Weekday'],index=['Hour'],aggfunc=np.mean)
 col_order=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
 PivotTable = PivotTable.reindex_axis(col_order,axis=1)
 
-PivotTable.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Avg')
+PivotTable.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Avg7day')
 
 ## Format Pivot Table 
-pivot = final_flow_ExcelFile.sheets[site_name+'PivotTable-Avg']
+pivot = final_flow_ExcelFile.sheets[site_name+'PivotTable-Avg7day']
 
 ## Conditional formatting
 # Add a format. Yellow fill with RED text.

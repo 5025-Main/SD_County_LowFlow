@@ -39,8 +39,10 @@ def Excel_Plots(site_name, Corr_flow, rain_1D, final_flow_ExcelFile,hydro_start,
     ## Format columns
     for sheet in [sheet_name_w_storms,sheet_name_clipped,'Rain']:#,'Field Calibrations']:
         final_flow_ExcelFile.sheets[sheet].set_column('A:Z',26)
+        final_flow_ExcelFile.sheets[sheet].freeze_panes(1, 1)
+    ## Extra space for clipped headers
     final_flow_ExcelFile.sheets[sheet_name_clipped].set_column('B:C',38)
-    
+   
     #final_flow_site.sheets['Field Calibrations'].set_column('C:F',24)
     
     ## Date format column for Date Axis
