@@ -286,7 +286,7 @@ for f in files:
     
     if offset_from_May == True:
         offsets = pd.DataFrame.from_csv(maindir+'offsets_May2019.csv')
-        tot_offset = offsets.loc[site_name]['total_offset']
+        tot_offset = offsets.loc[site_name]['total_offset_May']
         print ('')
         print ('Total offset calculated for the May 2019 deliverable: '+str(tot_offset))
         print ('...using total offset from May 2019 deliverable...')
@@ -988,52 +988,172 @@ plt.tight_layout()
 plt.subplots_adjust(top=0.95)
 
 fig.savefig(hydrograph_figureoutput_dir+'Hydrographs/'+site_name+'-working hydrograph.png')
-#%% HEAT MAPS
-## HEAT MAP Averaged by Weekday
-#
-#col_order=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
-#
-### 
-#data = pd.pivot_table(Corr_flow,values='Flow (gpm) stormflow clipped',columns=['Weekday'],index=['Hour'],aggfunc=np.sum)
-#
-#data = data.reindex_axis(col_order,axis=1)
-#
-#data.median()
-#
-#fig, ax = plt.subplots(1,1,figsize=(10,8))
-#
-#cax = ax.pcolor(data,shading='interp')
-#
-#ax.set_ylabel('HOUR of DAY',fontsize=14,fontweight='bold')
-#ax.set_xlabel('DAY of WEEK',fontsize=14,fontweight='bold')
-#ax.set_ylim(0,24)
-#ax.invert_yaxis()
-#cbar = fig.colorbar(cax,orientation='vertical')
-#
-#
-#plt.yticks(np.arange(0.5,24.5,1.),data.index.values)
-#plt.xticks(np.arange(.5,7.5,1.), data.columns.values)
-#
-#fig.suptitle('Heatmap of flow (sum) for '+site_name,fontsize=14,fontweight='bold')
-#plt.tight_layout()
-#plt.subplots_adjust(top=0.94)
-#
-#fig.savefig(hydrograph_figureoutput_dir+'Heatmaps/by weekday/'+site_name+'-heatmap by weekday.png')
 
-##%% HEAT MAP NOT Averaged by Weekday
-##col_order=['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday']
-#data = pd.pivot_table(Corr_flow,values='Flow (gpm) stormflow clipped', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.sum)  
-##data = data.reindex_axis(col_order,axis=1)
-#fig, ax = plt.subplots(1,1,figsize=(10,8))
-#cax = ax.pcolor(data,shading='interp')
-#ax.set_ylabel('HOUR of DAY',fontsize=14,fontweight='bold')
-#ax.set_xlabel('DAY',fontsize=14,fontweight='bold')
-#ax.set_ylim(0,24)
-#ax.invert_yaxis()
-#cbar = fig.colorbar(cax,orientation='vertical')
-#plt.yticks(np.arange(0.5,24.5,1.),data.index.values)
-#plt.xticks(np.arange(.5,len(data.columns)+0.5,1.), data.columns.values)
-#fig.suptitle('Heatmap of flow (sum) for '+site_name,fontsize=14,fontweight='bold')
-#plt.tight_layout()
-#plt.subplots_adjust(top=0.94)
-##fig.savefig(hydrograph_figureoutput_dir+'Heatmaps/'+site_name+'-heatmap.png')
+#%%  VIEW PHOTOS
+
+print 'Site for camera...'+site
+## Downloading photos from Google Photos
+pic_dir = 'C:/Users/alex.messina/Downloads/'
+pic_folder = site + '/'
+
+## Compile DF of datetimes and picture file names
+print ' compiling datetimes and picture file names....'
+pic_datetimes = pd.DataFrame()
+for pic in [os.listdir(pic_dir+pic_folder)][0]:
+    date_taken = Image.open(pic_dir+pic_folder + pic)._getexif()[36867]
+    t = dt.datetime.strptime(date_taken, '%Y:%m:%d %H:%M:%S')
+    pic_datetimes = pic_datetimes.append(pd.DataFrame({'Pic filename':pic,'Date Taken':t},index=[t]))
+print 'datetimes and picture file names....DONE'   
+
+#%% PHOTOS and DATA
+
+# define your images to be plotted
+#pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
+
+## Select by date
+pics = pic_datetimes[dt.datetime(2019,6,21):]['Pic filename']
+
+# now the real code :) 
+curr_pos = 0
+
+def key_event(e):
+    
+    global curr_pos
+
+    if e.key == "right":
+        curr_pos = curr_pos + 1
+    elif e.key == "left":
+        curr_pos = curr_pos - 1
+    else:
+        return
+    curr_pos = curr_pos % len(pics)
+    print 'key event '+str(curr_pos)
+  
+    ## Select pic
+    picture_file = pic_dir + pic_folder+ pics[curr_pos]
+    print 'Pic file: '+pics[curr_pos]
+    ## Extract datetime of pic and format datetime
+    date_taken = Image.open(picture_file)._getexif()[36867]
+    print 'Date taken: '+date_taken
+    t = dt.datetime.strptime(date_taken, '%Y:%m:%d %H:%M:%S')
+    t_round5 = dt.datetime(2019, t.month, t.day, t.hour,5*(t.minute // 5),0)
+    ## Get flow and level data at time of pic
+    flow_at_image = WL.ix[t_round5,'Flow_compound_weir']
+    level_at_image = WL.ix[t_round5,'offset_level_w_neg']
+    
+    ## Image
+    ax1.cla()
+    ax1.set_title('SITE: '+site+' Datetime: '+t.strftime('%m/%d/%y %H:%M') +' Pic: '+pics[curr_pos])
+    img=mpimg.imread(picture_file)
+    # from now on you can use img as an image, but make sure you know what you are doing!
+    if site == 'CAR-070':
+        rot_img=ndimage.rotate(img,degrees)
+        imgplot=ax1.imshow(rot_img)
+    else:
+        imgplot=ax1.imshow(img)
+    plt.show()
+    
+    ## Plot flow data
+    ax2.cla()
+    ax2.plot_date(WL.index,WL['Flow_compound_weir'],marker='None',ls='-',c='b',label='Flow compound weir')
+    ax2.plot_date(t_round5, flow_at_image,marker='o',ls='None',c='b',label='Flow at picture='+"%.3f"%flow_at_image)
+    
+    ## Plot Level data   
+    ax2_2.cla()
+    if level_at_image <0:
+        level_color = 'r'
+    elif level_at_image == 0:
+        level_color='k'
+    elif level_at_image>0:
+        level_color='g'
+    ax2_2.plot_date(WL.index, WL['offset_level_w_neg'],marker='None',ls='-',c=level_color,label='Level (inches)')  
+    ax2_2.plot_date(t_round5, level_at_image,marker='o',ls='None',c=level_color,label='Level at picture='+"%.2f"%level_at_image)
+    ax2_2.set_ylim(-1, 6)
+    ## Set plot limits
+    ax2.set_xlim(t_round5 - dt.timedelta(hours=8), t_round5 + dt.timedelta(hours=8))
+    ## Get flow data over a 24 hour surrounding period
+    flow_over_interval = WL.ix[t_round5 - dt.timedelta(hours=8):t_round5 + dt.timedelta(hours=8),'Flow_compound_weir']
+    ## y limits
+    if flow_over_interval.min() == 0. and flow_over_interval.max() > 0.:
+        ax2.set_ylim(-1.,flow_over_interval.max()*1.1)
+    elif flow_over_interval.min() == 0. and flow_over_interval.max() == 0.:
+            ax2.set_ylim(-3.,3.)
+    else:
+        ax2.set_ylim(flow_over_interval.min()*0.9,flow_over_interval.max()*1.1)
+        
+    ax2.xaxis.set_major_formatter(mpl.dates.DateFormatter('%A \n %m/%d/%y %H:%M'))
+
+    ax2.set_ylabel('Flow (gpm)'), ax2_2.set_ylabel('Level (inches)')
+
+    ## Legends, they're all around
+    ax2.legend(loc='upper left')
+    ax2_2.legend(loc='upper right')
+        
+    fig1.canvas.draw()
+    return
+
+
+
+fig1 = plt.figure(1,figsize=(16,11))
+fig1.canvas.mpl_connect('key_press_event', key_event)
+
+
+picture_file = pic_dir + pic_folder+ pics[curr_pos]
+date_taken = Image.open(picture_file)._getexif()[36867]
+t = dt.datetime.strptime(date_taken, '%Y:%m:%d %H:%M:%S')
+t_round5 = dt.datetime(2019, t.month, t.day, t.hour,5*(t.minute // 5),0)
+flow_at_image = WL.ix[t_round5,'Flow_compound_weir']
+level_at_image = WL.ix[t_round5,'offset_level_w_neg']
+
+## Image
+ax1 = plt.subplot(211)
+ax1.set_title('SITE: '+site+' Datetime: '+t.strftime('%m/%d/%y %H:%M'))
+img=mpimg.imread(picture_file)
+# from now on you can use img as an image, but make sure you know what you are doing!
+if site == 'CAR-070':
+    degrees = -90
+    rot_img=ndimage.rotate(img,degrees)
+    imgplot=plt.imshow(rot_img)
+else: 
+    imgplot=plt.imshow(img)
+plt.show()
+
+ax2 = plt.subplot(212)
+ax2.plot_date(WL.index,WL['Flow_compound_weir'],marker='None',ls='-',c='b',label='Flow compound weir')
+ax2.plot_date(t_round5, flow_at_image,marker='o',ls='None',c='b',label='Flow at picture='+"%.3f"%flow_at_image)
+
+
+## Level
+ax2_2 = ax2.twinx()
+if level_at_image <0:
+        level_color = 'r'
+elif level_at_image == 0:
+    level_color='k'
+elif level_at_image>0:
+    level_color='g'
+ax2_2.plot_date(WL.index, WL['offset_level_w_neg'],marker='None',ls='-',c=level_color,label='Level (inches)')
+ax2_2.plot_date(t_round5, level_at_image,marker='o',ls='None',c=level_color,label='Level at picture='+"%.2f"%level_at_image)
+ax2_2.set_ylim(-1, 6)
+
+## Legends, they're all around
+ax2.legend(loc='upper left')
+ax2_2.legend(loc='upper right')
+
+## Y labels
+ax2.set_ylabel('Flow (gpm)'), ax2_2.set_ylabel('Level (inches)')
+
+
+## x and y limits
+ax2.set_xlim(t_round5 - dt.timedelta(hours=8), t_round5 + dt.timedelta(hours=8))
+flow_over_interval = WL.ix[t_round5 - dt.timedelta(hours=8):t_round5 + dt.timedelta(hours=8),'Flow_compound_weir']
+if flow_over_interval.min() == 0. and flow_over_interval.max() > 0.:
+    ax2.set_ylim(-5.,flow_over_interval.max()*1.1)
+elif flow_over_interval.min() == 0. and flow_over_interval.max() == 0.:
+        ax2.set_ylim(-3.,3.)
+else:
+    ax2.set_ylim(flow_over_interval.min()*0.9,flow_over_interval.max()*1.1)
+## X axis date format
+ax2.xaxis.set_major_formatter(mpl.dates.DateFormatter('%A \n %m/%d/%y %H:%M'))
+
+
+plt.tight_layout()
