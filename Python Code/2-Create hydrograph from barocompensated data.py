@@ -27,7 +27,10 @@ import pandas as pd
 import numpy as np
 import calendar
 from scipy import signal
-
+## Image tools
+import matplotlib.image as mpimg
+from scipy import ndimage
+from PIL import Image
 
 ## Set Pandas display options
 pd.set_option('display.large_repr', 'truncate')
@@ -373,7 +376,7 @@ for f in files:
             pass
 
 ### PLOT QC hydrograph
-
+#%%
     fig, (ax1, ax2, ax4) = plt.subplots(3,1,figsize=(18,10),sharex=True)
     ## Plot full scale level data
     ## raw
@@ -871,8 +874,8 @@ calibration_ExcelFile.save()
 ### FINALIZED FLOW OUTPUT
 
 ## FLOW
-Corr_flow = WL[['offset_flow','Flow_compound_weir','Flow_compound_clipped']].round(2)
-Corr_flow.columns = ['Flow (gpm)', 'Flow compound weir (gpm)', 'Flow compound weir stormflow clipped (gpm)']
+Corr_flow = WL[['offset_flow','Flow_compound_weir', 'Flow_compound_clipped']].round(3)
+Corr_flow.columns = ['Flow v-notch only (gpm)', 'Flow compound weir (gpm)', 'Flow compound weir stormflow clipped (gpm)']
 
 ## Add base/peakflow
 Corr_flow[['Baseflow (gpm)','Peakflow (gpm)']] = WL[['Baseflow (gpm)','Peakflow (gpm)']]
@@ -991,10 +994,11 @@ fig.savefig(hydrograph_figureoutput_dir+'Hydrographs/'+site_name+'-working hydro
 
 #%%  VIEW PHOTOS
 
-print 'Site for camera...'+site
+
+print 'Site for camera...'+site_name
 ## Downloading photos from Google Photos
 pic_dir = 'C:/Users/alex.messina/Downloads/'
-pic_folder = site + '/'
+pic_folder = site_name + '/'
 
 ## Compile DF of datetimes and picture file names
 print ' compiling datetimes and picture file names....'
@@ -1011,7 +1015,7 @@ print 'datetimes and picture file names....DONE'
 #pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
 
 ## Select by date
-pics = pic_datetimes[dt.datetime(2019,6,21):]['Pic filename']
+pics = pic_datetimes[dt.datetime(2019,7,1):]['Pic filename']
 
 # now the real code :) 
 curr_pos = 0
@@ -1043,10 +1047,10 @@ def key_event(e):
     
     ## Image
     ax1.cla()
-    ax1.set_title('SITE: '+site+' Datetime: '+t.strftime('%m/%d/%y %H:%M') +' Pic: '+pics[curr_pos])
+    ax1.set_title('SITE: '+site_name+' Datetime: '+t.strftime('%m/%d/%y %H:%M') +' Pic: '+pics[curr_pos])
     img=mpimg.imread(picture_file)
     # from now on you can use img as an image, but make sure you know what you are doing!
-    if site == 'CAR-070':
+    if site_name == 'CAR-070':
         rot_img=ndimage.rotate(img,degrees)
         imgplot=ax1.imshow(rot_img)
     else:
@@ -1060,7 +1064,7 @@ def key_event(e):
     
     ## Plot Level data   
     ax2_2.cla()
-    if level_at_image <0:
+    if level_at_image <0 or np.isnan(level_at_image):
         level_color = 'r'
     elif level_at_image == 0:
         level_color='k'
@@ -1094,7 +1098,8 @@ def key_event(e):
 
 
 
-fig1 = plt.figure(1,figsize=(16,11))
+fig1, (ax1,ax2) = plt.subplots(2,1,figsize=(16,11))
+
 fig1.canvas.mpl_connect('key_press_event', key_event)
 
 
@@ -1106,26 +1111,26 @@ flow_at_image = WL.ix[t_round5,'Flow_compound_weir']
 level_at_image = WL.ix[t_round5,'offset_level_w_neg']
 
 ## Image
-ax1 = plt.subplot(211)
-ax1.set_title('SITE: '+site+' Datetime: '+t.strftime('%m/%d/%y %H:%M'))
+#ax1 = fig1.axes[0]
+ax1.set_title('SITE: '+site_name+' Datetime: '+t.strftime('%m/%d/%y %H:%M'))
 img=mpimg.imread(picture_file)
 # from now on you can use img as an image, but make sure you know what you are doing!
-if site == 'CAR-070':
+if site_name == 'CAR-070':
     degrees = -90
     rot_img=ndimage.rotate(img,degrees)
-    imgplot=plt.imshow(rot_img)
+    imgplot=ax1.imshow(rot_img)
 else: 
-    imgplot=plt.imshow(img)
+    imgplot=ax1.imshow(img)
 plt.show()
 
-ax2 = plt.subplot(212)
+ax2 = fig1.axes[1]
 ax2.plot_date(WL.index,WL['Flow_compound_weir'],marker='None',ls='-',c='b',label='Flow compound weir')
 ax2.plot_date(t_round5, flow_at_image,marker='o',ls='None',c='b',label='Flow at picture='+"%.3f"%flow_at_image)
 
 
 ## Level
 ax2_2 = ax2.twinx()
-if level_at_image <0:
+if level_at_image <0  or np.isnan(level_at_image):
         level_color = 'r'
 elif level_at_image == 0:
     level_color='k'
