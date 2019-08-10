@@ -40,6 +40,21 @@ pd.set_option('display.max_columns', 13)
 plt.ion()
 
 #%%
+# Python program to find Excel column name from a  
+# given column number 
+  
+def xl_columnrow(col,row=''):
+    """ Convert given row and column number to an Excel-style cell name. """
+    LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+    result = []
+    while col:
+        col, rem = divmod(col-1, 26)
+        result[:0] = LETTERS[rem]
+    return ''.join(result)+str(row)
+xl_columnrow(93,2)
+
+
+#%%
 
 ### UPDATE HERE #####
 data_processing_date = '07_31_2019' #end date of data
@@ -140,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SLR-045A'
+SITE_YOU_WANT_TO_PROCESS = 'CAR-072'
 
 
 ### UPDATE HERE #####
@@ -382,19 +397,19 @@ for f in files:
     fig, (ax1, ax2, ax4) = plt.subplots(3,1,figsize=(18,10),sharex=True)
     ## Plot full scale level data
     ## raw
-    ax1.plot_date(WL.index, WL['Level_in'], marker='None',ls='-',c='g',label='Raw level')
+    ax1.plot_date(WL.index, WL['Level_in'], marker='None',ls='-',c='g',alpha=0.25,label='Raw level')
     ## offset level with negatives for matching to negative calibrations
     ax1.plot_date(WL.index, WL['offset_level_w_neg'], marker='None',ls='-',c='grey',alpha=0.5,label='Raw level + offset')
     ## Plot offset level
     ax1.plot_date(WL.index, WL['offset_corr_level'], marker='None',ls='-',c='orange',label='Offset Final Level ('+"%.2f"%tot_offset+' in.)')
     ## Plot field measurements
-    ax1.plot_date(field_meas_level['Datetime'],field_meas_level['Level_above_V_in'],marker='s',c='r',label='Level Cal')
-    ax1.plot_date(field_meas_level_QC['Datetime'],field_meas_level_QC['Level_above_V_in'],marker='s',c='b',label='Level QC')
+    ax1.plot_date(field_meas_level['Datetime'],field_meas_level['Level_above_V_in'],marker='s',c='b',label='Initial Calibration measurements')
+    ax1.plot_date(field_meas_level_QC['Datetime'],field_meas_level_QC['Level_above_V_in'],marker='s',c='r',label='Follow-up QC measurements')
     ## Plot maximum v-notch height
     ax1.axhline(weir_dims.loc[site_name,'h2'],color='grey')
     ax1.axhline(weir_dims.loc[site_name,'h1'] + weir_dims.loc[site_name,'h2'],color='k')
     textstr = 'Weir crest height: '+str(weir_dims.loc[site_name,'h2'])+' inches'
-    ax1.annotate(textstr, (mpl.dates.date2num(dt.datetime(2018,6,1)),weir_dims.loc[site_name,'h2']))
+    ax1.annotate(textstr, (mpl.dates.date2num(dt.datetime(2019,6,1)),weir_dims.loc[site_name,'h2']))
     ## Plot temp
     #ax1_1 = ax1.twinx()
     #ax1_1.plot_date(WL.index, WL['Temp_F'], marker='None',ls='-',c='grey',label='Temp F')
@@ -411,7 +426,7 @@ for f in files:
     ## Put notes on the plot
     for row in fds.loc[[site_name]][['Datetime','NOTES']].iterrows():
         note = '\n'.join(textwrap.wrap(row[1]['NOTES'], 16))
-        ax2.annotate(note,xy=(pd.to_datetime(row[1]['Datetime']),WL['offset_flow'].max()),rotation=90,verticalalignment='bottom')
+        ax2.annotate(note,xy=(pd.to_datetime(row[1]['Datetime']),WL['offset_flow'].mean()),rotation=90,verticalalignment='bottom')
         ax2.axvline(pd.to_datetime(row[1]['Datetime']),color='grey',alpha=0.5)
 
     ### Plot precip on inverted, secondary y axis
@@ -482,9 +497,9 @@ meas_vals_QC['Offset Level Data (in)'] =  meas_vals_QC['Datetime'].apply(lambda 
 fig, ax = plt.subplots(1,1,figsize=(12,10))
 
 one_to_one = ax.plot([-10,1000],[-10,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
-points = ax.plot(meas_vals['Level_above_V_in'],meas_vals['Offset Level Data (in)'],ls='None',marker='o',c='b',markersize=12,label='Cal Level (in)')
+points = ax.plot(meas_vals['Level_above_V_in'],meas_vals['Offset Level Data (in)'],ls='None',marker='o',c='b',markersize=12,label='Initial Calibration measurements')
 
-QCpoints = ax.plot(meas_vals_QC['Level_above_V_in'],meas_vals_QC['Offset Level Data (in)'],ls='None',marker='o',c='r',markersize=12,label='QC Level (in)', )
+QCpoints = ax.plot(meas_vals_QC['Level_above_V_in'],meas_vals_QC['Offset Level Data (in)'],ls='None',marker='o',c='r',markersize=12,label='Follow-up QC measurements', )
  
     
     
@@ -505,7 +520,7 @@ plt.subplots_adjust(top=0.93)
 hover_points(points, list(meas_vals['Datetime']), fig, ax)
 hover_points(QCpoints, list(meas_vals_QC['Datetime']), fig, ax)
 
-#%% CHECK FIELD LEVEL vs FLOW MEASUREMENTS
+#%% CHECK PREDICTED FLOW FROM LEVEL vs FLOW MEASUREMENTS
 
 field_meas = fds.loc[[site_name]][['Datetime','Level_above_V_in','Flow_gpm_1','Flow_gpm_2','Flow_gpm_3']]
 field_meas['Predicted_flow'] = [HvF.loc[np.round(x,2)]['Q (GPM)'] for x in field_meas['Level_above_V_in'].values]
@@ -524,9 +539,9 @@ meas_vals = meas_vals[meas_vals['Datetime']<dt.datetime(2019,5,31)]
 fig, ax = plt.subplots(1,1,figsize=(12,10))
 
 one_to_one = ax.plot([0,1000],[0,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
-points = ax.plot(meas_vals['Flow_gpm'],meas_vals['Predicted_flow'],ls='None',marker='o',markersize=12,label='Cal Flow',c='b')
+points = ax.plot(meas_vals['Flow_gpm'],meas_vals['Predicted_flow'],ls='None',marker='o',markersize=12,label='Initial Calibration measurements',c='b')
 
-QCpoints = ax.plot(meas_vals_QC['Flow_gpm'],meas_vals_QC['Predicted_flow'],ls='None',marker='o',markersize=12,label='QC Flow',c='r')
+QCpoints = ax.plot(meas_vals_QC['Flow_gpm'],meas_vals_QC['Predicted_flow'],ls='None',marker='o',markersize=12,label='Follow-up QC measurements',c='r')
 
 ax.set_xlabel('Measured Flow (gpm)',fontweight='bold',fontsize=16)
 ax.set_ylabel('Predicted flow from Measured Level (gpm)',fontweight='bold',fontsize=16)
@@ -583,8 +598,8 @@ print 'Average difference between measured, and final processed flow values: '+"
 fig, ax = plt.subplots(1,1,figsize=(12,10))
 
 one_to_one = ax.plot([0,1000],[0,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
-points = ax.plot(final_flow_vals['Flow_gpm'],final_flow_vals['offset_flow'],ls='None',marker='o',markersize=12,label='Flow Cal',c='b')
-QCpoints = ax.plot(final_flow_vals_QC['Flow_gpm'],final_flow_vals_QC['offset_flow'],ls='None',marker='o',markersize=12,label='Flow QC',c='r')
+points = ax.plot(final_flow_vals['Flow_gpm'],final_flow_vals['offset_flow'],ls='None',marker='o',markersize=12,label='Initial Calibration measurements',c='b')
+QCpoints = ax.plot(final_flow_vals_QC['Flow_gpm'],final_flow_vals_QC['offset_flow'],ls='None',marker='o',markersize=12,label='Follow-up QC measurements',c='r')
 
 ax.set_xlabel('Measured Flow (gpm)',fontweight='bold',fontsize=16)
 ax.set_ylabel('Flow data Output (gpm)',fontweight='bold',fontsize=16)
@@ -722,7 +737,7 @@ fig.suptitle('Data processing for site: '+site_name,fontsize=16,fontweight='bold
 plt.tight_layout()
 plt.subplots_adjust(top=0.95)
 
-#%% BASEFLOW SEPARATION
+#%% HYDROGRAPH SEPARATION
 
 alpha = 0.990
 
@@ -798,7 +813,7 @@ df[['h_k1','b_k1','b_k2']]
 
 flowoutput = df[['Flow_compound_weir','Flow compound weir (gpm) smooth']]
 flowoutput.loc[:,'Baseflow (gpm)'] = df['b_k2']
-flowoutput.loc[:,'Peakflow (gpm)'] = df['Flow compound weir (gpm) smooth'] - df['b_k2']
+flowoutput.loc[:,'Quickflow (gpm)'] = df['Flow compound weir (gpm) smooth'] - df['b_k2']
 
 ## Put in original flow data and Mask where Nan values in orginal dataset
 flowoutput.loc[:,'Flow_compound_weir'] = WL[[u'Flow_compound_weir']]
@@ -806,11 +821,11 @@ m = pd.notnull(flowoutput['Flow_compound_weir'])
 flowoutput = flowoutput.where(m, np.nan)   
 
 WL.loc[:,'Baseflow (gpm)'] = flowoutput['Baseflow (gpm)'].round(3)
-WL.loc[:,'Peakflow (gpm)'] = flowoutput['Peakflow (gpm)'].round(3)
+WL.loc[:,'Quickflow (gpm)'] = flowoutput['Quickflow (gpm)'].round(3)
 
 ## Drop data for data dropouts
 WL['Baseflow (gpm)'] = np.where(WL['Level_in'].isnull(),np.nan,WL['Baseflow (gpm)'])
-WL['Peakflow (gpm)'] = np.where(WL['Level_in'].isnull(),np.nan,WL['Peakflow (gpm)'])
+WL['Quickflow (gpm)'] = np.where(WL['Level_in'].isnull(),np.nan,WL['Quickflow (gpm)'])
 
 #%% BASEFLOW PLOT
 ## PLOT
@@ -879,8 +894,8 @@ calibration_ExcelFile.save()
 Corr_flow = WL[['offset_flow','Flow_compound_weir', 'Flow_compound_clipped']].round(3)
 Corr_flow.columns = ['Flow v-notch only (gpm)', 'Flow compound weir (gpm)', 'Flow compound weir stormflow clipped (gpm)']
 
-## Add base/peakflow
-Corr_flow[['Baseflow (gpm)','Peakflow (gpm)']] = WL[['Baseflow (gpm)','Peakflow (gpm)']]
+## Add base/quickflow
+Corr_flow[['Baseflow (gpm)','Quickflow (gpm)']] = WL[['Baseflow (gpm)','Quickflow (gpm)']]
 
 ## Add temp and conductivity to deliverable
 Corr_flow[u'uS/cm EC'] = WL[u'uS/cm EC'].round(0)
@@ -905,13 +920,23 @@ max_row, rain_max_row = Excel_Plots(site_name, Corr_flow, rain_1D, final_flow_Ex
 ## Old style-SUM
 PivotTable_Sum = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.sum).round(1)
 PivotTable_Sum.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Sum')
+## Freeze Panes
 final_flow_ExcelFile.sheets[site_name+'PivotTable-Sum'].freeze_panes(4, 1)
-final_flow_ExcelFile.sheets[site_name+'PivotTable-Sum'].conditional_format('B5:G83', {'type': '3_color_scale','min_color': "gree",'mid_color': "yellow",'max_color': "red"})
+## Conditional Formatting
+def rgb_hex(red,green,blue):
+    return '#%02x%02x%02x' % (red, green, blue)
+green, yellow, red = rgb_hex(99,190,123),rgb_hex(255,235,132),rgb_hex(248,105,107)
+
+max_col_row = xl_columnrow(len(PivotTable_Sum.columns)+1,28) #24th hour is on row 28
+final_flow_ExcelFile.sheets[site_name+'PivotTable-Sum'].conditional_format('B5:'+max_col_row, {'type': '3_color_scale','min_color': green,'mid_color':yellow,'max_color':red})
 ## Old style-AVG
 PivotTable_Avg = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.mean).round(3)
 PivotTable_Avg.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Avg')
+## Freeze Panes
 final_flow_ExcelFile.sheets[site_name+'PivotTable-Avg'].freeze_panes(4, 1)
-final_flow_ExcelFile.sheets[site_name+'PivotTable-Avg'].conditional_format('G2:G83', {'type': '3_color_scale','min_color': "gree",'mid_color': "yellow",'max_color': "red"})
+## Conditional Formatting
+max_col_row = xl_columnrow(len(PivotTable_Sum.columns)+1,28)  #24th hour is on row 28
+final_flow_ExcelFile.sheets[site_name+'PivotTable-Avg'].conditional_format('B5:'+max_col_row, {'type': '3_color_scale','min_color': green,'mid_color': yellow,'max_color': red})
 
 ## Seven day Average style
 PivotTable = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)',columns=['Weekday'],index=['Hour'],aggfunc=np.mean)
