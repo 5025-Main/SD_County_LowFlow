@@ -39,7 +39,7 @@ pd.set_option('display.max_rows', 20)
 pd.set_option('display.max_columns', 13)
 plt.ion()
 
-#%%
+
 # Python program to find Excel column name from a  
 # given column number 
   
@@ -51,7 +51,7 @@ def xl_columnrow(col,row=''):
         col, rem = divmod(col-1, 26)
         result[:0] = LETTERS[rem]
     return ''.join(result)+str(row)
-xl_columnrow(93,2)
+#xl_columnrow(93,2)
 
 
 #%%
@@ -917,8 +917,8 @@ max_row, rain_max_row = Excel_Plots(site_name, Corr_flow, rain_1D, final_flow_Ex
 
 ### Pivot TABLES
 
-## Old style-SUM
-PivotTable_Sum = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.sum).round(1)
+## Old style-SUM but ADDING the multiplication by 5min (gpm->gp5M)
+PivotTable_Sum = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.sum).round(1) * 5. # *5 for 5Min interval data
 PivotTable_Sum.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Sum')
 ## Freeze Panes
 final_flow_ExcelFile.sheets[site_name+'PivotTable-Sum'].freeze_panes(4, 1)
