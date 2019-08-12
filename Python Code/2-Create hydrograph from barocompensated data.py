@@ -155,11 +155,11 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'CAR-072'
+SITE_YOU_WANT_TO_PROCESS = 'CAR-070'
 
 
 ### UPDATE HERE #####
-start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,31,23,59)
+start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,31,23,55)
 #end = dt.datetime(2019,7,22,23,59)
 
 # when you want to cut off calibration points
@@ -1031,7 +1031,7 @@ fig.savefig(hydrograph_figureoutput_dir+'Hydrographs/'+site_name+'-working hydro
 
 print 'Site for camera...'+site_name
 ## Downloading photos from Google Photos
-pic_dir = 'C:/Users/alex.messina/Downloads/'
+pic_dir = 'C:/Users/jameson.newtson/Downloads/'
 pic_folder = site_name + '/'
 
 ## Compile DF of datetimes and picture file names
