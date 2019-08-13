@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SLR-045B'
+SITE_YOU_WANT_TO_PROCESS = 'SLR-045'
 
 
 ### UPDATE HERE #####
