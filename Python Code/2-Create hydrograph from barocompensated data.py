@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-203A'
+SITE_YOU_WANT_TO_PROCESS = 'SLR-045B'
 
 
 ### UPDATE HERE #####
@@ -392,7 +392,7 @@ for f in files:
             print ('No data to clip...')
             pass
 
-#%% PLOT QC hydrograph
+##%% PLOT QC hydrograph
     fig, (ax1, ax2, ax4) = plt.subplots(3,1,figsize=(18,10),sharex=True)
     ## Plot full scale level data
     ## raw
@@ -496,6 +496,8 @@ meas_vals_QC['Offset Level Data (in)'] =  meas_vals_QC['Datetime'].apply(lambda 
 fig, ax = plt.subplots(1,1,figsize=(12,10))
 
 one_to_one = ax.plot([-10,1000],[-10,1000],ls='-',marker='None',color='grey',alpha=0.5,label='1:1')
+one_to_one_plus = ax.plot([-10,1000],[-10.1,1000.1],ls='--',marker='None',color='grey',alpha=0.5,label='+0.1')
+one_to_one = ax.plot([-10,1000],[-9.9,999.9],ls='--',marker='None',color='grey',alpha=0.5,label='-0.1')
 points = ax.plot(meas_vals['Level_above_V_in'],meas_vals['Offset Level Data (in)'],ls='None',marker='o',c='b',markersize=12,label='Initial Calibration measurements')
 
 QCpoints = ax.plot(meas_vals_QC['Level_above_V_in'],meas_vals_QC['Offset Level Data (in)'],ls='None',marker='o',c='r',markersize=12,label='Follow-up QC measurements', )
@@ -505,8 +507,9 @@ QCpoints = ax.plot(meas_vals_QC['Level_above_V_in'],meas_vals_QC['Offset Level D
 ax.set_xlabel('Measured Level (in)',fontweight='bold',fontsize=16)
 ax.set_ylabel('Offset Level data (in)',fontweight='bold',fontsize=16)
 
-ax.set_xlim(0, 1.3 *meas_vals['Level_above_V_in'].max())
-ax.set_ylim(0, 1.3 *meas_vals['Level_above_V_in'].max())
+max_level = meas_vals[[u'Level_above_V_in', u'Offset Level Data (in)']].max().max()
+ax.set_xlim(0, 1.3 *max_level.max())
+ax.set_ylim(0, 1.3 *max_level.max())
 
 ax.legend(loc='upper left')
 
@@ -625,6 +628,8 @@ try:
     US = pd.read_excel(ancillarydir+'Alta May 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D')
     
     US = US.append(pd.read_excel(ancillarydir+'Alta June 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
+    
+    US = US.append(pd.read_excel(ancillarydir+'Alta July 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
     
     
     ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
