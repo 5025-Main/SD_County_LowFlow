@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'CAR-070'
+SITE_YOU_WANT_TO_PROCESS = 'SDG-084J'
 
 
 ### UPDATE HERE #####
@@ -627,6 +627,7 @@ try:
     
     US = US.append(pd.read_excel(ancillarydir+'Alta June 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
     
+    US = US.append(pd.read_excel(ancillarydir+'Alta July 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
     
     ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
     
@@ -918,7 +919,7 @@ max_row, rain_max_row = Excel_Plots(site_name, Corr_flow, rain_1D, final_flow_Ex
 ### Pivot TABLES
 
 ## Old style-SUM
-PivotTable_Sum = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.sum).round(1)
+PivotTable_Sum = pd.pivot_table(Corr_flow,values='Flow compound weir stormflow clipped (gpm)', columns=['Month','Day','Weekday'], index=['Hour'], aggfunc=np.sum).round(1)*5
 PivotTable_Sum.to_excel(final_flow_ExcelFile,site_name+'PivotTable-Sum')
 ## Freeze Panes
 final_flow_ExcelFile.sheets[site_name+'PivotTable-Sum'].freeze_panes(4, 1)
@@ -1049,7 +1050,7 @@ print 'datetimes and picture file names....DONE'
 #pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
 
 ## Select by date
-pics = pic_datetimes[dt.datetime(2019,7,1):]['Pic filename']
+pics = pic_datetimes[dt.datetime(2019,7,30,20,0):]['Pic filename']
 
 # now the real code :) 
 curr_pos = 0
