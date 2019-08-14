@@ -175,7 +175,7 @@ if len(files) == 0:
     print 
     print 'No data file found in folder!'
     
-for f in files: 
+for f in files[0:1]: 
     #MaxFlow = HvF.loc[np.round(MaxLevel,2)]['Q (GPM)']
     print ('')
     print ('Filename: '+f)
@@ -396,9 +396,11 @@ for f in files:
     fig, (ax1, ax2, ax4) = plt.subplots(3,1,figsize=(18,10),sharex=True)
     ## Plot full scale level data
     ## raw
-    ax1.plot_date(WL.index, WL['Level_in'], marker='None',ls='-',c='g',alpha=0.25,label='Raw level')
+    ax1.plot_date(WL.index, WL['Level_in_orig'], marker='None',ls='-',c='grey',alpha=0.25,label='Raw level')
+    ##raw +overall offset
+    ax1.plot_date(WL.index, WL['Level_in'], marker='None',ls='-',c='g',alpha=0.25,label='Raw level+overall offset')
     ## offset level with negatives for matching to negative calibrations
-    ax1.plot_date(WL.index, WL['offset_level_w_neg'], marker='None',ls='-',c='grey',alpha=0.5,label='Raw level + offset')
+    ax1.plot_date(WL.index, WL['offset_level_w_neg'], marker='None',ls='-',c='grey',alpha=0.5,label='Raw level + tot_offset')
     ## Plot offset level
     ax1.plot_date(WL.index, WL['offset_corr_level'], marker='None',ls='-',c='orange',label='Offset Final Level ('+"%.2f"%tot_offset+' in.)')
     ## Plot field measurements
