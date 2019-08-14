@@ -39,6 +39,7 @@ pd.set_option('display.max_rows', 20)
 pd.set_option('display.max_columns', 13)
 plt.ion()
 
+os.chdir('F:/github/work/SD_County_LowFlow/')
 
 # Python program to find Excel column name from a  
 # given column number 
@@ -155,7 +156,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-127'
+SITE_YOU_WANT_TO_PROCESS = 'SDR-723'
 
 
 ### UPDATE HERE #####
