@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-127'
+SITE_YOU_WANT_TO_PROCESS = 'CAR-072'
 
 
 ### UPDATE HERE #####
@@ -175,7 +175,7 @@ if len(files) == 0:
     print 
     print 'No data file found in folder!'
     
-for f in files[0:1]: 
+for f in files: 
     #MaxFlow = HvF.loc[np.round(MaxLevel,2)]['Q (GPM)']
     print ('')
     print ('Filename: '+f)
@@ -634,9 +634,17 @@ try:
     US = US.append(pd.read_excel(ancillarydir+'Alta July 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
     
     
-    ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
+#    ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
+#    US.index = pd.to_datetime(((US.index.astype(np.int64) // ns5min + 1 ) * ns5min))
     
-    US.index = pd.to_datetime(((US.index.astype(np.int64) // ns5min + 1 ) * ns5min))
+    US['idx'] = US.index
+    US['idx'] =US['idx'].apply(lambda x: dt.datetime(x.year, x.month, x.day, x.hour,5*(x.minute // 5)))
+    US = US.drop_duplicates(subset=['idx'])
+    
+    
+    US.index = US['idx']
+    
+    US = US.reindex(pd.date_range(dt.datetime(2019,5,1,0,0),dt.datetime(2019,7,31,23,55),freq='5Min'))
     
     ## PLOT
     fig, (ax1, ax2) = plt.subplots(2,1,figsize=(18,10),sharex=True)
@@ -1055,7 +1063,7 @@ print 'datetimes and picture file names....DONE'
 #pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
 
 ## Select by date
-pics = pic_datetimes[dt.datetime(2019,7,1):]['Pic filename']
+pics = pic_datetimes[dt.datetime(2019,7,13):]['Pic filename']
 
 # now the real code :) 
 curr_pos = 0
