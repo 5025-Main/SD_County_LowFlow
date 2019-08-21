@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'CAR-072'
+SITE_YOU_WANT_TO_PROCESS = 'SLR-095'
 
 
 ### UPDATE HERE #####
@@ -392,7 +392,7 @@ for f in files:
             print ('No data to clip...')
             pass
 
-##%% PLOT QC hydrograph
+#%% PLOT QC hydrograph
     fig, (ax1, ax2, ax4) = plt.subplots(3,1,figsize=(18,10),sharex=True)
     ## Plot full scale level data
     ## raw
@@ -1063,7 +1063,7 @@ print 'datetimes and picture file names....DONE'
 #pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
 
 ## Select by date
-pics = pic_datetimes[dt.datetime(2019,7,13):]['Pic filename']
+pics = pic_datetimes[dt.datetime(2019,7,10):]['Pic filename']
 
 # now the real code :) 
 curr_pos = 0
@@ -1098,9 +1098,10 @@ def key_event(e):
     ax1.set_title('SITE: '+site_name+' Datetime: '+t.strftime('%m/%d/%y %H:%M') +' Pic: '+pics[curr_pos])
     img=mpimg.imread(picture_file)
     # from now on you can use img as an image, but make sure you know what you are doing!
-    if site_name == 'CAR-070':
+    if site_name == 'CAR-070' or site_name=='SDR-064':
         rot_img=ndimage.rotate(img,degrees)
         imgplot=ax1.imshow(rot_img)
+        
     else:
         imgplot=ax1.imshow(img)
     plt.show()
@@ -1167,6 +1168,11 @@ if site_name == 'CAR-070':
     degrees = -90
     rot_img=ndimage.rotate(img,degrees)
     imgplot=ax1.imshow(rot_img)
+elif site_name=='SDR-064':
+    degrees = 90
+    rot_img=ndimage.rotate(img,degrees)
+    imgplot=ax1.imshow(rot_img)    
+    
 else: 
     imgplot=ax1.imshow(img)
 plt.show()
