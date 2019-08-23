@@ -1,0 +1,81 @@
+{
+	"variables": [],
+	"info": {
+		"name": "ZENTRA Cloud",
+		"_postman_id": "af4c031c-8278-80aa-b31a-9ab2b45f2e84",
+		"description": "",
+		"schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "https://zentracloud.com/api/1.0/readings",
+			"request": {
+				"url": {
+					"raw": "https://zentracloud.com/api/v1/readings?sn=<insert_sn>&start_mrid=10000",
+					"protocol": "https",
+					"host": [
+						"zentracloud",
+						"com"
+					],
+					"path": [
+						"api",
+						"v1",
+						"readings"
+					],
+					"query": [
+						{
+							"key": "sn",
+							"value": "<insert_sn>",
+							"equals": true,
+							"description": ""
+						},
+						{
+							"key": "start_mrid",
+							"value": "10000",
+							"equals": true,
+							"description": ""
+						}
+					],
+					"variable": []
+				},
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token <insert_token>",
+						"description": ""
+					}
+				],
+				"body": {},
+				"description": ""
+			},
+			"response": []
+		},
+		{
+			"name": "Token",
+			"request": {
+				"url": "https://zentracloud.com/api/v1/tokens",
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Token 7c35dc990389da954c6c5a4c887bfb8d57c61810",
+						"description": "",
+						"disabled": true
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"description": ""
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n\t\"username\": \"<insert_username>\",\n\t\"password\": \"<insert_password>\"\n}"
+				},
+				"description": ""
+			},
+			"response": []
+		}
+	]
+}
