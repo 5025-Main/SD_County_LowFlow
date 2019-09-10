@@ -33,7 +33,7 @@ def getDeviceReadings(site_name,start_time_loc):
         'CAR-072':('06-02294','27595-95125'),
         'CAR-072B':('06-02127','63599-01736'),
         'CAR-072O':('06-02246','70870-65036'),
-        
+        'SDG-084J':('06-02225','86271-24221')
         }
     
     
@@ -77,7 +77,7 @@ def getDeviceReadings(site_name,start_time_loc):
 if __name__ == "__main__":
     
     ##
-    site = 'CAR-070'
+    site = 'SDG-084J'
     
     start_time_loc = dt.datetime(2019,8,1,0,0)
     
