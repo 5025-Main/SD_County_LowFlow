@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-1024'
+SITE_YOU_WANT_TO_PROCESS = 'SLR-095'
 
 
 ### UPDATE HERE #####
@@ -392,7 +392,7 @@ for f in files:
             print ('No data to clip...')
             pass
 
-##%% PLOT QC hydrograph
+#%% PLOT QC hydrograph
     fig, (ax1, ax2, ax4) = plt.subplots(3,1,figsize=(18,10),sharex=True)
     ## Plot full scale level data
     ## raw
