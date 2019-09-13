@@ -184,11 +184,11 @@ daily_rain_files = raindir+'Daily/'
 #rainfiles = [s for s in os.listdir(raindir) if raingauge_dict[site_name] in s]
 
 #for one gauge
-gauge_name = 'Rainbow'
+gauge_name = 'Flinn_Springs'
 rainfiles = [s for s in os.listdir(raw_rain_files) if gauge_name in s]
 
 #for all gauges
-rainfiles = [s for s in os.listdir(raw_rain_files) if s.endswith('.xls')]
+#rainfiles = [s for s in os.listdir(raw_rain_files) if s.endswith('.xls')]
 
 fig, ax = plt.subplots(1,1,figsize=(12,8))
 

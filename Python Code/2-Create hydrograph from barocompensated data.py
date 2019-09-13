@@ -39,7 +39,6 @@ pd.set_option('display.max_rows', 20)
 pd.set_option('display.max_columns', 13)
 plt.ion()
 
-os.chdir('F:/github/work/SD_County_LowFlow/')
 
 # Python program to find Excel column name from a  
 # given column number 
@@ -58,8 +57,8 @@ def xl_columnrow(col,row=''):
 #%%
 
 ### UPDATE HERE #####
-data_processing_date = '07_31_2019' #end date of data
-prev_data_processing_date = '05_31_2019' ## Monthly deliverables ONLY
+data_processing_date = '08_31_2019' #end date of data
+prev_data_processing_date = '07_31_2019' ## Monthly deliverables ONLY
 #####################
 
 maindir = os.getcwd().replace('\\','/') +'/'
@@ -156,12 +155,12 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-723'
+SITE_YOU_WANT_TO_PROCESS = 'SDR-098'
 
 
 
 ### UPDATE HERE #####
-start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,7,31,23,59)
+start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,8,31,23,59)
 #end = dt.datetime(2019,7,22,23,59)
 
 # when you want to cut off calibration points
@@ -190,7 +189,7 @@ for f in files:
     
     print 'Previous Deliverable file: ' + prev_deliv_dir + prev_deliv_filename
     print
-    del_df = pd.read_excel(prev_deliv_dir+prev_deliv_filename, sheetname=site_name+'-flow',index_col=0,header=0,parse_cols='A:D')
+    del_df = pd.read_excel(prev_deliv_dir+prev_deliv_filename, sheetname=site_name+'-all flow',index_col=0,header=0,parse_cols='A:D')
     
     ## Level data
     WL = pd.read_excel(leveldir+f, skiprows= [0,1], index_col=0, header=0)
@@ -453,7 +452,7 @@ for f in files:
     ax4.plot_date(field_meas_flow_QC['Datetime'],field_meas_flow_QC['Flow_gpm_3'],marker='o',c='b',label='Field meas. flow 3')
     
     ## Previous deliverable data
-    #ax4.plot_date(del_df.index,del_df['Flow compound weir (gpm)'], marker='None',ls='-',c='b',label='Previous deliverable')
+    ax4.plot_date(del_df.index,del_df['Flow compound weir (gpm)'], marker='None',ls='-',c='b',label='Previous deliverable')
    
     ### Plot precip on inverted, secondary y axis
     ax4_2 = ax4.twinx()
@@ -635,6 +634,7 @@ try:
     
     US = US.append(pd.read_excel(ancillarydir+'Alta July 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
     
+    US = US.append(pd.read_excel(ancillarydir+'Alta August 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
     
 #    ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
 #    US.index = pd.to_datetime(((US.index.astype(np.int64) // ns5min + 1 ) * ns5min))
@@ -646,7 +646,7 @@ try:
     
     US.index = US['idx']
     
-    US = US.reindex(pd.date_range(dt.datetime(2019,5,1,0,0),dt.datetime(2019,7,31,23,55),freq='5Min'))
+    US = US.reindex(pd.date_range(dt.datetime(2019,5,1,0,0),dt.datetime(2019,8,31,23,55),freq='5Min'))
     
     ## PLOT
     fig, (ax1, ax2) = plt.subplots(2,1,figsize=(18,10),sharex=True)
@@ -1065,7 +1065,7 @@ print 'datetimes and picture file names....DONE'
 #pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
 
 ## Select by date
-pics = pic_datetimes[dt.datetime(2019,7,10):]['Pic filename']
+pics = pic_datetimes[dt.datetime(2019,7,30):]['Pic filename']
 
 # now the real code :) 
 curr_pos = 0
