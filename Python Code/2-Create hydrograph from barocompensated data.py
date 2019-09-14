@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-098'
+SITE_YOU_WANT_TO_PROCESS = 'SDR-127'
 
 
 
@@ -393,7 +393,7 @@ for f in files:
             print ('No data to clip...')
             pass
 
-#%% PLOT QC hydrograph
+##%% PLOT QC hydrograph
     fig, (ax1, ax2, ax4) = plt.subplots(3,1,figsize=(18,10),sharex=True)
     ## Plot full scale level data
     ## raw
@@ -452,7 +452,7 @@ for f in files:
     ax4.plot_date(field_meas_flow_QC['Datetime'],field_meas_flow_QC['Flow_gpm_3'],marker='o',c='b',label='Field meas. flow 3')
     
     ## Previous deliverable data
-    ax4.plot_date(del_df.index,del_df['Flow compound weir (gpm)'], marker='None',ls='-',c='b',label='Previous deliverable')
+    #ax4.plot_date(del_df.index,del_df['Flow compound weir (gpm)'], marker='None',ls='-',c='b',label='Previous deliverable')
    
     ### Plot precip on inverted, secondary y axis
     ax4_2 = ax4.twinx()
@@ -635,6 +635,7 @@ try:
     US = US.append(pd.read_excel(ancillarydir+'Alta July 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
     
     US = US.append(pd.read_excel(ancillarydir+'Alta August 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
+
     
 #    ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
 #    US.index = pd.to_datetime(((US.index.astype(np.int64) // ns5min + 1 ) * ns5min))
@@ -1065,7 +1066,7 @@ print 'datetimes and picture file names....DONE'
 #pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
 
 ## Select by date
-pics = pic_datetimes[dt.datetime(2019,7,30):]['Pic filename']
+pics = pic_datetimes[dt.datetime(2019,8,16):]['Pic filename']
 
 # now the real code :) 
 curr_pos = 0
