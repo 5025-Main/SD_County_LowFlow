@@ -392,10 +392,16 @@ for f in files:
         else:
             print ('No data to clip...')
             pass
-
+        
+        
+     ## Highlight missing data  
+    missing_data = pd.DataFrame(WL[np.isnan(WL['Level_in_orig'])]['Level_in_orig'])
+    missing_data['Level_in_orig'] = 0.
+    missing_data = missing_data.reindex(index=pd.date_range(start,end,freq='5Min'))
 ##%% PLOT QC hydrograph
     fig, (ax1, ax2, ax4) = plt.subplots(3,1,figsize=(18,10),sharex=True)
     ## Plot full scale level data
+    ax1.plot_date(missing_data.index,missing_data['Level_in_orig'],marker='None',ls='-',c='r',label='Missing Data')
     ## raw
     ax1.plot_date(WL.index, WL['Level_in_orig'], marker='None',ls='-',c='grey',alpha=0.25,label='Raw level')
     ##raw +overall offset
