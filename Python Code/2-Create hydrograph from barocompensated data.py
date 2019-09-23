@@ -57,7 +57,7 @@ def xl_columnrow(col,row=''):
 #%%
 
 ### UPDATE HERE #####
-data_processing_date = '08_31_2019' #end date of data
+data_processing_date = '09_15_2019' #end date of data
 prev_data_processing_date = '07_31_2019' ## Monthly deliverables ONLY
 #####################
 
@@ -155,12 +155,12 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-127'
+SITE_YOU_WANT_TO_PROCESS = 'CAR-070'
 
 
 
 ### UPDATE HERE #####
-start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,8,31,23,59)
+start, end = dt.datetime(2019,5,1,0,0), dt.datetime(2019,9,15,23,59)
 #end = dt.datetime(2019,7,22,23,59)
 
 # when you want to cut off calibration points
