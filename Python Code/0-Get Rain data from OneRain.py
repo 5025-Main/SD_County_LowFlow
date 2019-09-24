@@ -188,7 +188,7 @@ gauge_name = 'Flinn_Springs'
 rainfiles = [s for s in os.listdir(raw_rain_files) if gauge_name in s]
 
 #for all gauges
-#rainfiles = [s for s in os.listdir(raw_rain_files) if s.endswith('.xls')]
+rainfiles = [s for s in os.listdir(raw_rain_files) if s.endswith('.xls')]
 
 fig, ax = plt.subplots(1,1,figsize=(12,8))
 

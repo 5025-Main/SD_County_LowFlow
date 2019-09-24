@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'CAR-070'
+SITE_YOU_WANT_TO_PROCESS = 'SDG-085M'
 
 
 
@@ -184,13 +184,15 @@ for f in files:
     site_name = f.split(' ')[0]     
     print ('Site name: '+site_name)
     print ('')
-    ## Read in previous deliverable
-    prev_deliv_filename = [d for d in os.listdir(prev_deliv_dir) if d.endswith('.xlsx') == True and SITE_YOU_WANT_TO_PROCESS == d.split('-working draft.xlsx')[0]][0]
-    
-    print 'Previous Deliverable file: ' + prev_deliv_dir + prev_deliv_filename
-    print
-    del_df = pd.read_excel(prev_deliv_dir+prev_deliv_filename, sheetname=site_name+'-all flow',index_col=0,header=0,parse_cols='A:D')
-    
+    try:
+        ## Read in previous deliverable
+        prev_deliv_filename = [d for d in os.listdir(prev_deliv_dir) if d.endswith('.xlsx') == True and SITE_YOU_WANT_TO_PROCESS == d.split('-working draft.xlsx')[0]][0]
+        
+        print 'Previous Deliverable file: ' + prev_deliv_dir + prev_deliv_filename
+        print
+        del_df = pd.read_excel(prev_deliv_dir+prev_deliv_filename, sheetname=site_name+'-all flow',index_col=0,header=0,parse_cols='A:D')
+    except:
+        pass
     ## Level data
     WL = pd.read_excel(leveldir+f, skiprows= [0,1], index_col=0, header=0)
     WL = WL.rename(columns={'in Water Level':'Level_in_orig'})
@@ -393,8 +395,7 @@ for f in files:
             print ('No data to clip...')
             pass
         
-        
-     ## Highlight missing data  
+    ## Highlight missing data  
     missing_data = pd.DataFrame(WL[np.isnan(WL['Level_in_orig'])]['Level_in_orig'])
     missing_data['Level_in_orig'] = 0.
     missing_data = missing_data.reindex(index=pd.date_range(start,end,freq='5Min'))
@@ -1072,7 +1073,7 @@ print 'datetimes and picture file names....DONE'
 #pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
 
 ## Select by date
-pics = pic_datetimes[dt.datetime(2019,8,16):]['Pic filename']
+pics = pic_datetimes[pic_datetimes.index >= dt.datetime(2019,8,1,0,0)]['Pic filename']
 
 # now the real code :) 
 curr_pos = 0
