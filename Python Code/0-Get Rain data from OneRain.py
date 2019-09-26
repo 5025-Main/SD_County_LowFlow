@@ -25,8 +25,8 @@ import requests
 import datetime as dt
 import os
 
-maindir = 'C:/Users/alex.messina/Documents/GitHub/SD_County_LowFlow/'
-os.chdir('C:/Users/alex.messina/Documents/GitHub/SD_County_LowFlow/Python Code/')
+maindir = 'C:/Users/jameson.newtson/Documents/GitHub/SD_County_LowFlow/'
+os.chdir('C:/Users/jameson.newtson/Documents/GitHub/SD_County_LowFlow/Python Code/')
 
 SITE_IDs = {'Bonita':11,'Bonsall':	118,'Cactus County Park':	74,'Couser Canyon':	117,'Deer Springs':	104,'El Camino del Norte':	32,'Flinn Springs County Park':	61,'La Mesa':	16,'Lake Hodges':	29,'Los Coches':	62,'Rainbow County Park':	121,'Rancho Bernardo':	28,'Roads Div I':	15,'San Marcos CRS':	105}
 
@@ -184,7 +184,7 @@ daily_rain_files = raindir+'Daily/'
 #rainfiles = [s for s in os.listdir(raindir) if raingauge_dict[site_name] in s]
 
 #for one gauge
-gauge_name = 'Flinn_Springs'
+gauge_name = 'Deer_Springs'
 rainfiles = [s for s in os.listdir(raw_rain_files) if gauge_name in s]
 
 #for all gauges

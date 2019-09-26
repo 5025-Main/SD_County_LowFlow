@@ -58,7 +58,7 @@ def xl_columnrow(col,row=''):
 
 ### UPDATE HERE #####
 data_processing_date = '09_15_2019' #end date of data
-prev_data_processing_date = '07_31_2019' ## Monthly deliverables ONLY
+prev_data_processing_date = '08_31_2019' ## Monthly deliverables ONLY
 #####################
 
 maindir = os.getcwd().replace('\\','/') +'/'
@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'CAR-070'
+SITE_YOU_WANT_TO_PROCESS = 'SLR-045'
 
 
 
@@ -301,7 +301,7 @@ for f in files:
         print ('Total offset = '+"%.2f"%tot_offset)
     
     
-    offset_from_May = True
+    offset_from_May = False
     
     if offset_from_May == True:
         offsets = pd.DataFrame.from_csv(maindir+'offsets_May2019.csv')
