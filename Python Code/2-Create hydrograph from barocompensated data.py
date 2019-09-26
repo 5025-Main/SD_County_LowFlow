@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDG-085M'
+SITE_YOU_WANT_TO_PROCESS = 'SDR-1024'
 
 
 
@@ -304,6 +304,7 @@ for f in files:
     
     
     offset_from_May = True
+    
     
     if offset_from_May == True:
         offsets = pd.DataFrame.from_csv(maindir+'offsets_May2019.csv')
@@ -714,6 +715,7 @@ ax1.plot_date(WL.index, WL[u'°F Logger Temperature'],marker='None',ls='-',c='to
 ## Cond
 cond_cals = fds[fds['SITE ID'] == site_name][['Datetime','Specific Conductivity (uS/cm)']].dropna()
 WL[u'uS/cm EC'] = WL[u'mS/cm EC'] * 1000.
+
 ax2.plot_date(WL.index, WL[u'uS/cm EC'],marker='None',ls='-',c='tomato',label='Cond (uS/cm)')
 ax2.plot_date(cond_cals['Datetime'],cond_cals['Specific Conductivity (uS/cm)'],marker='o',ls='None',color='r',label='Manual measurements')
 
@@ -1073,7 +1075,7 @@ print 'datetimes and picture file names....DONE'
 #pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
 
 ## Select by date
-pics = pic_datetimes[pic_datetimes.index >= dt.datetime(2019,8,1,0,0)]['Pic filename']
+pics = pic_datetimes[pic_datetimes.index >= dt.datetime(2019,9,1,0,0)]['Pic filename']
 
 # now the real code :) 
 curr_pos = 0
