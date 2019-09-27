@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-1024'
+SITE_YOU_WANT_TO_PROCESS = 'SDR-772'
 
 
 
@@ -400,7 +400,8 @@ for f in files:
     missing_data = pd.DataFrame(WL[np.isnan(WL['Level_in_orig'])]['Level_in_orig'])
     missing_data['Level_in_orig'] = 0.
     missing_data = missing_data.reindex(index=pd.date_range(start,end,freq='5Min'))
-##%% PLOT QC hydrograph
+
+#%% PLOT QC hydrograph
     fig, (ax1, ax2, ax4) = plt.subplots(3,1,figsize=(18,10),sharex=True)
     ## Plot full scale level data
     ax1.plot_date(missing_data.index,missing_data['Level_in_orig'],marker='None',ls='-',c='r',label='Missing Data')
@@ -643,6 +644,8 @@ try:
     US = US.append(pd.read_excel(ancillarydir+'Alta July 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
     
     US = US.append(pd.read_excel(ancillarydir+'Alta August 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
+    
+    US = US.append(pd.read_excel(ancillarydir+'Alta September 2019 Flow Deliverable.xlsx', sheetname='MS4-'+site_name, index_col=0, header=0,parse_cols='B:D'))
 
     
 #    ns5min=5*60*1000000000   # 5 minutes in nanoseconds 
@@ -655,7 +658,7 @@ try:
     
     US.index = US['idx']
     
-    US = US.reindex(pd.date_range(dt.datetime(2019,5,1,0,0),dt.datetime(2019,8,31,23,55),freq='5Min'))
+    US = US.reindex(pd.date_range(dt.datetime(2019,5,1,0,0),dt.datetime(2019,9,15,23,55),freq='5Min'))
     
     ## PLOT
     fig, (ax1, ax2) = plt.subplots(2,1,figsize=(18,10),sharex=True)
@@ -1075,7 +1078,7 @@ print 'datetimes and picture file names....DONE'
 #pics = [os.listdir(pic_dir+pic_folder)][0][5000:] ## You can limit photos here
 
 ## Select by date
-pics = pic_datetimes[pic_datetimes.index >= dt.datetime(2019,9,1,0,0)]['Pic filename']
+pics = pic_datetimes[pic_datetimes.index >= dt.datetime(2019,7,27,0,0)]['Pic filename']
 
 # now the real code :) 
 curr_pos = 0
