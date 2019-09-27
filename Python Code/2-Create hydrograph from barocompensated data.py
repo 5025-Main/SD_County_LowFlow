@@ -58,7 +58,7 @@ def xl_columnrow(col,row=''):
 
 ### UPDATE HERE #####
 data_processing_date = '09_15_2019' #end date of data
-prev_data_processing_date = '08_31_2019' ## Monthly deliverables ONLY
+prev_data_processing_date = '07_31_2019' ## Monthly deliverables ONLY
 #####################
 
 maindir = os.getcwd().replace('\\','/') +'/'
@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SLR-045'
+SITE_YOU_WANT_TO_PROCESS = 'SDR-568'
 
 
 
