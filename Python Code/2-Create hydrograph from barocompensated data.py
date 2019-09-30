@@ -155,7 +155,7 @@ print ('')
 ## SITE NAME HERE #################
 
 
-SITE_YOU_WANT_TO_PROCESS = 'SDR-772'
+SITE_YOU_WANT_TO_PROCESS = 'CAR-072B'
 
 
 
@@ -401,7 +401,7 @@ for f in files:
     missing_data['Level_in_orig'] = 0.
     missing_data = missing_data.reindex(index=pd.date_range(start,end,freq='5Min'))
 
-#%% PLOT QC hydrograph
+##%% PLOT QC hydrograph
     fig, (ax1, ax2, ax4) = plt.subplots(3,1,figsize=(18,10),sharex=True)
     ## Plot full scale level data
     ax1.plot_date(missing_data.index,missing_data['Level_in_orig'],marker='None',ls='-',c='r',label='Missing Data')
@@ -445,7 +445,7 @@ for f in files:
     ax3.plot_date(rain.index, rain['Precip_in'], marker='None',ls='steps-mid',color='teal',label='Precip: '+raingauge_dict[site_name])
     
     ## Plot all flow data as greyed out bad data
-    #ax4.plot_date(WL.index, WL['offset_flow'], marker='None',ls='-',c='red',alpha=0.5,label='Simple V flow')
+    ax4.plot_date(WL.index, WL['offset_flow'], marker='None',ls='-',c='red',alpha=0.5,label='Simple V flow')
     ## Plot compound weir flow data (including correct flow for overtopping flows)
     ax4.plot_date(WL.index, WL['Flow_compound_weir'], marker='None',ls='-',c='grey',alpha=0.5,label='Clipped flow data (storm/bad)')
     ## Plot corrected data (offset and clipped)
