@@ -9,7 +9,7 @@ Created on Fri May 19 12:11:47 2017
 ## to load modules set working directory to C:\Users\alex.messina\Documents\GitHub\SD_County_LowFlow\Python code\
 
 
-import os
+
 
 # Import Custom Modules
 from Excel_Plots import Excel_Plots    
@@ -23,7 +23,7 @@ import datetime as dt
 import matplotlib as mpl
 from matplotlib import pyplot as plt
 import pandas as pd
-
+import os
 import numpy as np
 import calendar
 from scipy import signal
