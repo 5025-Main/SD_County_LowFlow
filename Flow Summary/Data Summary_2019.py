@@ -20,7 +20,7 @@ pivotoutputdir = maindir+'Flow Summary/Compiled Totals 2019/'
 
 def fill_w_median(data):
 
-    clipped_col = [col for col in data.columns if col.endswith('no stormflow')][0]
+    clipped_col = [col for col in data.columns][0]
     ## ROLING MEDIANS
     ## Smooth data into 1HR rolling median
     data.loc[:,'1H roll_median'] = data[clipped_col].rolling(int(60./5.),center=True,min_periods=int(30./5.)).median()
@@ -45,12 +45,12 @@ def fill_w_median(data):
 AllTotalFlows = pd.ExcelWriter(maindir+'Combined Flow Totals-All Sites.xlsx')
 AllSites_df = pd.DataFrame()
 
-for f in os.listdir(flowdata):
+for f in [d for d in os.listdir(flowdata) if d.endswith('xlsx')]:
     print f
     site = f.split('-working draft.xlsx')[0]
     print 'Site: '+site
     ## Open data
-    df = pd.read_excel(flowdata+f,sheetname=site+'stormflow clipped')
+    df = pd.read_excel(flowdata+f,sheetname=site+'-stormflow clipped')
     ## Create output Excel File
     Flow_and_Totals = pd.ExcelWriter(outputdir + site+'-Flow and Totals.xlsx')
     Totals_pivot_tables = pd.ExcelWriter(pivotoutputdir + site+'-Totals.xlsx')
@@ -140,15 +140,14 @@ summary2 = pd.DataFrame(columns=['WMA','Mean Flow (gpm) Main Outfalls','Mean Flo
 
 summs = pd.DataFrame()
 
-#sites = [f for f in os.listdir(flowdata) if f.split('-Flow.csv')[0] in recalc_sites]
-#for f in sites:                     
-for d in [f for f in os.listdir(flowdata) if f.endswith('.csv')]:                               
+                 
+for d in [f for f in os.listdir(flowdata) if f.endswith('.xlsx')]:                               
                                                                                                                        
-    #print f                       
-    site = d.split('-Flow.csv')[0]
-    print 'Site: ' +  site
-    df = pd.DataFrame.from_csv(flowdata + d)
-    
+    site = d.split('-working draft.xlsx')[0]
+    print 'Site: '+site
+    ## Open data
+    df = pd.read_excel(flowdata+d,sheetname=site+'-stormflow clipped')
+                       
     if site == 'HST01':
         WMA = 'SLR'
         main_special = 'MainOutfall'      
